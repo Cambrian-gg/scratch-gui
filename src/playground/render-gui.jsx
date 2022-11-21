@@ -79,6 +79,8 @@ export default appTarget => {
                 showComingSoon
                 backpackHost={backpackHost}
                 canSave={false}
+                canCreateNew={true}
+                projectHost={"https://cambrian-gg.herokuapp.com"}
                 onClickLogo={onClickLogo}
             />,
         appTarget);
