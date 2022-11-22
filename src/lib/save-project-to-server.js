@@ -16,13 +16,13 @@ import storage from '../lib/storage';
  */
 export default function (projectId, vmState, params) {
     const urlSearchParams = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(urlSearchParams.entries());
+    const urlParams = Object.fromEntries(urlSearchParams.entries());
     const opts = {
         body: vmState,
         // If we set json:true then the body is double-stringified, so don't
         headers: {
-            'Content-Type': 'application/json'
-            'Authorization': `Bearer ${params.apiToken}`
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${urlParams.apiToken}`
         },
         withCredentials: true
     };
