@@ -46,13 +46,13 @@ class Storage extends ScratchStorage {
     getProjectCreateConfig () {
         return {
             url: `${this.projectHost}/`,
-            // withCredentials: true
+            withCredentials: true
         };
     }
     getProjectUpdateConfig (projectAsset) {
         return {
             url: `${this.projectHost}/${projectAsset.assetId}`,
-            // withCredentials: true
+            withCredentials: true
         };
     }
     setAssetHost (assetHost) {
@@ -69,7 +69,7 @@ class Storage extends ScratchStorage {
             // Then when storage finds this config to use for the "update", still POSTs
             method: 'post',
             url: `${this.assetHost}/${asset.assetId}.${asset.dataFormat}`,
-            // withCredentials: true
+            withCredentials: true
         };
     }
     setTranslatorFunction (translator) {
