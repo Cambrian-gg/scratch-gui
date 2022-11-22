@@ -24,8 +24,8 @@ const base = {
     },
     output: {
         library: 'GUI',
-        filename: '[name].js',
-        chunkFilename: 'chunks/[name].js'
+        filename: '[name].[contenthash].js',
+        chunkFilename: 'chunks/[name].[contenthash].js'
     },
     resolve: {
         symlinks: false
@@ -107,7 +107,7 @@ module.exports = [
         },
         output: {
             path: path.resolve(__dirname, 'build'),
-            filename: '[name].js'
+            filename: '[name].[contenthash].js'
         },
         module: {
             rules: base.module.rules.concat([
