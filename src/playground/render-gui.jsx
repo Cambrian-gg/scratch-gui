@@ -78,7 +78,7 @@ export default appTarget => {
                 backpackVisible
                 showComingSoon
                 backpackHost={backpackHost}
-                canSave={false}
+                canSave={true}
                 canCreateNew={true}
                 projectHost={"https://cambrian-gg.herokuapp.com/scratch_projects"}
                 onClickLogo={onClickLogo}
