@@ -22,7 +22,7 @@ export default function (projectId, vmState, params) {
         // If we set json:true then the body is double-stringified, so don't
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${urlParams.apiToken}`
+            'Authorization': `Bearer ${urlParams.token}`
         },
         withCredentials: true
     };

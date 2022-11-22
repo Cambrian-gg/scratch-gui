@@ -36,7 +36,11 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 'fetchProject'
             ]);
             storage.setProjectHost(props.projectHost);
-            storage.setProjectToken(props.projectToken);
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const urlParams = Object.fromEntries(urlSearchParams.entries());
+
+            // storage.setProjectToken(props.projectToken);
+            storage.setProjectToken(urlParams.token)
             storage.setAssetHost(props.assetHost);
             storage.setTranslatorFunction(props.intl.formatMessage);
             // props.projectId might be unset, in which case we use our default;
