@@ -76,257 +76,83 @@ class AITab extends React.Component {
     constructor (props) {
         super(props);
         bindAll(this, [
-            'handleSelectCostume',
-            'handleDeleteCostume',
-            'handleDuplicateCostume',
-            'handleExportCostume',
-            'handleNewCostume',
-            'handleNewBlankCostume',
-            'handleSurpriseCostume',
-            'handleSurpriseBackdrop',
-            'handleFileUploadClick',
-            'handleCostumeUpload',
-            'handleDrop',
-            'setFileInput'
+            'handleNewCard',
+            'handleDeleteCard'
         ]);
-        const {
-            editingTarget,
-            sprites,
-            stage
-        } = props;
-        const target = editingTarget && sprites[editingTarget] ? sprites[editingTarget] : stage;
-        if (target && target.currentCostume) {
-            this.state = {selectedCostumeIndex: target.currentCostume};
-        } else {
-            this.state = {selectedCostumeIndex: 0};
+        this.state = {
+          cards: [
+            { id: "card-t-rex", name: "T-Rex", size: 4, height: 4, strength: 4, image: "https://ddd" },
+            { id: "card-stegasaurus", name: "Stegasaurus", size: 4, height: 4, strength: 4, image: "https://ddd" },
+            { id: "card-triceraptors", name: "Triceraptors", size: 4, height: 4, strength: 4, image: "https://ddd" },
+          ]
         }
     }
+
     componentWillReceiveProps (nextProps) {
-        const {
-            editingTarget,
-            sprites,
-            stage
-        } = nextProps;
+    }
 
-        const target = editingTarget && sprites[editingTarget] ? sprites[editingTarget] : stage;
-        if (!target || !target.costumes) {
-            return;
-        }
+    handleNewCard (name) {
+      name = new Date().getTime().toString()
+      const newCard = { id: `card-${name}`, name: `card-${name}`, size: 4, height: 4, strength: 4, image: "https://ddd" }
+      this.setState({ cards: [...this.state.cards, newCard] } );
+    }
 
-        if (this.props.editingTarget === editingTarget) {
-            // If costumes have been added or removed, change costumes to the editing target's
-            // current costume.
-            const oldTarget = this.props.sprites[editingTarget] ?
-                this.props.sprites[editingTarget] : this.props.stage;
-            // @todo: Find and switch to the index of the costume that is new. This is blocked by
-            // https://github.com/LLK/scratch-vm/issues/967
-            // Right now, you can land on the wrong costume if a costume changing script is running.
-            if (oldTarget.costumeCount !== target.costumeCount) {
-                this.setState({selectedCostumeIndex: target.currentCostume});
-            }
-        } else {
-            // If switching editing targets, update the costume index
-            this.setState({selectedCostumeIndex: target.currentCostume});
-        }
-    }
-    handleSelectCostume (costumeIndex) {
-        this.props.vm.editingTarget.setCostume(costumeIndex);
-        this.setState({selectedCostumeIndex: costumeIndex});
-    }
-    handleDeleteCostume (costumeIndex) {
-        const restoreCostumeFun = this.props.vm.deleteCostume(costumeIndex);
-        this.props.dispatchUpdateRestore({
-            restoreFun: restoreCostumeFun,
-            deletedItem: 'Costume'
-        });
-    }
-    handleDuplicateCostume (costumeIndex) {
-        this.props.vm.duplicateCostume(costumeIndex);
-    }
-    handleExportCostume (costumeIndex) {
-        const item = this.props.vm.editingTarget.sprite.costumes[costumeIndex];
-        const blob = new Blob([item.asset.data], {type: item.asset.assetType.contentType});
-        downloadBlob(`${item.name}.${item.asset.dataFormat}`, blob);
-    }
-    handleNewCostume (costume, fromCostumeLibrary, targetId) {
-        const costumes = Array.isArray(costume) ? costume : [costume];
+    handleDeleteCard(event) {
+      const newCards = this.state.cards.filter(card=> {
+        return card.name != event.target.value
+      })
 
-        return Promise.all(costumes.map(c => {
-            if (fromCostumeLibrary) {
-                return this.props.vm.addCostumeFromLibrary(c.md5, c);
-            }
-            // If targetId is falsy, VM should default it to editingTarget.id
-            // However, targetId should be provided to prevent #5876,
-            // if making new costume takes a while
-            return this.props.vm.addCostume(c.md5, c, targetId);
-        }));
+      this.setState({ cards: newCards })
     }
-    handleNewBlankCostume () {
-        const name = this.props.vm.editingTarget.isStage ?
-            this.props.intl.formatMessage(messages.backdrop, {index: 1}) :
-            this.props.intl.formatMessage(messages.costume, {index: 1});
-        this.handleNewCostume(emptyCostume(name));
-    }
-    handleSurpriseCostume () {
-        const item = costumeLibraryContent[Math.floor(Math.random() * costumeLibraryContent.length)];
-        const vmCostume = {
-            name: item.name,
-            md5: item.md5ext,
-            rotationCenterX: item.rotationCenterX,
-            rotationCenterY: item.rotationCenterY,
-            bitmapResolution: item.bitmapResolution,
-            skinId: null
-        };
-        this.handleNewCostume(vmCostume, true /* fromCostumeLibrary */);
-    }
-    handleSurpriseBackdrop () {
-        const item = backdropLibraryContent[Math.floor(Math.random() * backdropLibraryContent.length)];
-        const vmCostume = {
-            name: item.name,
-            md5: item.md5ext,
-            rotationCenterX: item.rotationCenterX,
-            rotationCenterY: item.rotationCenterY,
-            bitmapResolution: item.bitmapResolution,
-            skinId: null
-        };
-        this.handleNewCostume(vmCostume);
-    }
-    handleCostumeUpload (e) {
-        const storage = this.props.vm.runtime.storage;
-        const targetId = this.props.vm.editingTarget.id;
-        this.props.onShowImporting();
-        handleFileUpload(e.target, (buffer, fileType, fileName, fileIndex, fileCount) => {
-            costumeUpload(buffer, fileType, storage, vmCostumes => {
-                vmCostumes.forEach((costume, i) => {
-                    costume.name = `${fileName}${i ? i + 1 : ''}`;
-                });
-                this.handleNewCostume(vmCostumes, false, targetId).then(() => {
-                    if (fileIndex === fileCount - 1) {
-                        this.props.onCloseImporting();
-                    }
-                });
-            }, this.props.onCloseImporting);
-        }, this.props.onCloseImporting);
-    }
-    handleFileUploadClick () {
-        this.fileInput.click();
-    }
-    handleDrop (dropInfo) {
-        if (dropInfo.dragType === DragConstants.COSTUME) {
-            const sprite = this.props.vm.editingTarget.sprite;
-            const activeCostume = sprite.costumes[this.state.selectedCostumeIndex];
-            this.props.vm.reorderCostume(this.props.vm.editingTarget.id,
-                dropInfo.index, dropInfo.newIndex);
-            this.setState({selectedCostumeIndex: sprite.costumes.indexOf(activeCostume)});
-        } else if (dropInfo.dragType === DragConstants.BACKPACK_COSTUME) {
-            this.props.vm.addCostume(dropInfo.payload.body, {
-                name: dropInfo.payload.name
-            });
-        } else if (dropInfo.dragType === DragConstants.BACKPACK_SOUND) {
-            this.props.onActivateSoundsTab();
-            this.props.vm.addSound({
-                md5: dropInfo.payload.body,
-                name: dropInfo.payload.name
-            });
-        }
-    }
-    setFileInput (input) {
-        this.fileInput = input;
-    }
-    formatCostumeDetails (size, optResolution) {
-        // If no resolution is given, assume that the costume is an SVG
-        const resolution = optResolution ? optResolution : 1;
-        // Convert size to stage units by dividing by resolution
-        // Round up width and height for scratch-flash compatibility
-        // https://github.com/LLK/scratch-flash/blob/9fbac92ef3d09ceca0c0782f8a08deaa79e4df69/src/ui/media/MediaInfo.as#L224-L237
-        return `${Math.ceil(size[0] / resolution)} x ${Math.ceil(size[1] / resolution)}`;
-    }
+
     render () {
-        const {
-            dispatchUpdateRestore, // eslint-disable-line no-unused-vars
-            intl,
-            isRtl,
-            onNewLibraryBackdropClick,
-            onNewLibraryCostumeClick,
-            vm
-        } = this.props;
+        const cards = this.state.cards?.map((card)=> (
+          <tr key={card.id}>
+            <td>{card.name}</td>
+            <td>{card.size}</td>
+            <td>{card.height}</td>
+            <td>{card.strength}</td>
+            <td>{card.image}</td>
+            <td><button onClick={this.handleDeleteCard} value={card.name} className="btn btn-red">Delete</button></td>
+          </tr>
+          )
+        );
 
-        if (!vm.editingTarget) {
-            return null;
-        }
-
-        const isStage = vm.editingTarget.isStage;
-        const target = vm.editingTarget.sprite;
-
-        const addLibraryMessage = isStage ? messages.addLibraryBackdropMsg : messages.addLibraryCostumeMsg;
-        const addFileMessage = isStage ? messages.addFileBackdropMsg : messages.addFileCostumeMsg;
-        const addSurpriseFunc = isStage ? this.handleSurpriseBackdrop : this.handleSurpriseCostume;
-        const addLibraryFunc = isStage ? onNewLibraryBackdropClick : onNewLibraryCostumeClick;
-        const addLibraryIcon = isStage ? addLibraryBackdropIcon : addLibraryCostumeIcon;
-
-        const costumeData = target.costumes ? target.costumes.map(costume => ({
-            name: costume.name,
-            asset: costume.asset,
-            details: costume.size ? this.formatCostumeDetails(costume.size, costume.bitmapResolution) : null,
-            dragPayload: costume
-        })) : [];
         return (
-          <p>Put things here</p>
+          <div className  ="container px-4 mx-auto my-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="h3">Card List</h1>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Height</th>
+                    <th scope="col">Stregth</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Delete</th>
+                   </tr>
+                </thead>
+                <tbody>
+                  {cards}
+                </tbody>
+              </table>
+              <button onClick={this.handleNewCard} className="btn btn-white">New Card</button>
+            </div>
+          </div>
         );
     }
 }
 
 AITab.propTypes = {
-    dispatchUpdateRestore: PropTypes.func,
-    editingTarget: PropTypes.string,
-    intl: intlShape,
-    isRtl: PropTypes.bool,
-    onActivateSoundsTab: PropTypes.func.isRequired,
-    onCloseImporting: PropTypes.func.isRequired,
-    onNewLibraryBackdropClick: PropTypes.func.isRequired,
-    onNewLibraryCostumeClick: PropTypes.func.isRequired,
-    onShowImporting: PropTypes.func.isRequired,
-    sprites: PropTypes.shape({
-        id: PropTypes.shape({
-            costumes: PropTypes.arrayOf(PropTypes.shape({
-                url: PropTypes.string,
-                name: PropTypes.string.isRequired,
-                skinId: PropTypes.number
-            }))
-        })
-    }),
-    stage: PropTypes.shape({
-        sounds: PropTypes.arrayOf(PropTypes.shape({
-            name: PropTypes.string.isRequired
-        }))
-    }),
-    vm: PropTypes.instanceOf(VM)
 };
 
 const mapStateToProps = state => ({
-    editingTarget: state.scratchGui.targets.editingTarget,
-    isRtl: state.locales.isRtl,
-    sprites: state.scratchGui.targets.sprites,
-    stage: state.scratchGui.targets.stage,
-    dragging: state.scratchGui.assetDrag.dragging
 });
 
 const mapDispatchToProps = dispatch => ({
-    onActivateCostumeTag: () => dispatch(activateTab(COSTUMES_TAB_INDEX)),
-    onActivateSoundsTab: () => dispatch(activateTab(SOUNDS_TAB_INDEX)),
-    onNewLibraryBackdropClick: e => {
-        e.preventDefault();
-        dispatch(openBackdropLibrary());
-    },
-    onNewLibraryCostumeClick: e => {
-        e.preventDefault();
-        dispatch(openCostumeLibrary());
-    },
-    dispatchUpdateRestore: restoreState => {
-        dispatch(setRestore(restoreState));
-    },
-    onCloseImporting: () => dispatch(closeAlertWithId('importingAsset')),
-    onShowImporting: () => dispatch(showStandardAlert('importingAsset'))
 });
 
 export default errorBoundaryHOC('AI Tab')(
