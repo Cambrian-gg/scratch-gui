@@ -79,23 +79,35 @@ class AITab extends React.Component {
         super(props);
     }
 
-    componentWillReceiveProps (nextProps) {
-    }
-
-
     render () {
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const urlParams = Object.fromEntries(urlSearchParams.entries());
+        const hashMatch = window.location.hash.match(/#(\d+)/);
+        const projectId = hashMatch === null ? 0 : hashMatch[1];
         return (
-            <Deck/>
+            // <Deck
+            //   host={"http://localhost:3030"}
+            //   token={"Vsv4eVB6bm4123xSpQgngasr"}
+            //   projectId={"9"}
+            // />
+            <Deck
+              host={"https://cambrian-gg.herokuapp.com"}
+              token={urlParams.token}
+              projectId={projectId}
+            />
         )
     }
 }
 
 AITab.propTypes = {
+  reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 
-const mapStateToProps = state => ({
-});
-
+const mapStateToProps = state => {
+  return {
+    reduxProjectId: state.scratchGui.projectState.projectId
+  }
+};
 
 const mapDispatchToProps = dispatch => ({
 });
@@ -106,3 +118,4 @@ export default errorBoundaryHOC('AI Tab')(
         mapDispatchToProps
     )(AITab))
 );
+

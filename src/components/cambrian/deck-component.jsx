@@ -6,6 +6,7 @@ function DeckComponent(props) {
     const {
       onDeleteCard,
       onAddCard,
+      onSaveDeck,
       deck
     } = props;
 
@@ -44,6 +45,7 @@ function DeckComponent(props) {
           </table>
           <button onClick={onAddCard} className="btn btn-white">New Card</button>
         </div>
+        <button onClick={onSaveDeck} className="btn btn-white">Save deck</button>
       </div>
     );
 }
@@ -52,6 +54,7 @@ DeckComponent.propTypes = {
     cards: PropTypes.arrayOf(PropTypes.object),
     onDeleteCard: PropTypes.func,
     onAddCard: PropTypes.func,
+    onSaveDeck: PropTypes.func,
 };
 
 export default DeckComponent;
