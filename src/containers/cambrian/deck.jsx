@@ -45,11 +45,13 @@ class Deck extends React.Component {
           if (error || response.statusCode !== 200) {
               return reject(new Error(response.status));
           }
-          this.setState(
-              {
-                  deck: response.body[0]
-              }
-          ) // take the first one as we know only how to handle the first one.
+          if(response.body[0]) {
+            this.setState(
+                {
+                    deck: response.body[0]
+                }
+            ) // take the first one as we know only how to handle the first one.
+          }
       })
     }
 
@@ -126,7 +128,10 @@ class Deck extends React.Component {
           token,
           projectId
         } = this.props;
-
+        if(projectId == null || projectId == undefined) {
+          alert("Please save the project first.")
+          return;
+        }
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'POST',
