@@ -173,7 +173,7 @@ class Deck extends React.Component {
 Deck.propTypes = {
   host: PropTypes.string,
   token: PropTypes.string,
-  projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+  projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 const mapStateToProps = state => ({
