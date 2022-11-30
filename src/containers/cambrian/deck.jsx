@@ -128,10 +128,12 @@ class Deck extends React.Component {
           token,
           projectId
         } = this.props;
-        if(projectId == null || projectId == undefined) {
+
+        if(projectId == null || projectId == undefined || projectId == 0) {
           alert("Please save the project first.")
           return;
         }
+
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'POST',
@@ -171,7 +173,7 @@ class Deck extends React.Component {
 Deck.propTypes = {
   host: PropTypes.string,
   token: PropTypes.string,
-  projectId: PropTypes.string,
+  projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
 };
 
 const mapStateToProps = state => ({
