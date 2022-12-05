@@ -80,10 +80,13 @@ class AITab extends React.Component {
     }
 
     render () {
+        let projectId = this.props.reduxProjectId;
         const urlSearchParams = new URLSearchParams(window.location.search);
         const urlParams = Object.fromEntries(urlSearchParams.entries());
-        const hashMatch = window.location.hash.match(/#(\d+)/);
-        const projectId = hashMatch === null ? 0 : hashMatch[1];
+        if(projectId == null || projectId == undefined) {
+            const hashMatch = window.location.hash.match(/#(\d+)/);
+            projecId = hashMatch === null ? 0 : hashMatch[1];
+        }
         return (
             // <Deck
             //   host={"http://localhost:3030"}

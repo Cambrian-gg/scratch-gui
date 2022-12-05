@@ -35,7 +35,7 @@ class Deck extends React.Component {
 
       xhr({
           method: 'GET',
-          uri: `${host}/scratch_decks?project_id=${projectId}`,
+          uri: `${host}/scratch/decks?project_id=${projectId}`,
           headers: {
             "Content-Type": 'application/json',
             'Authorization': `Bearer ${token}`
@@ -57,16 +57,35 @@ class Deck extends React.Component {
 
     handleAddCard (name) {
         name = new Date().getTime().toString()
-        const newCard = { id: `card-${name}`, name: `card-${name}`, size: 4, height: 4, strength: 4, image: "https://ddd" }
-        const deck = this.state.deck;
-        this.setState(
-            {
-                deck: {
-                  ...deck,
-                  cards: [...deck.cards, newCard]
-                }
+        xhr({
+          method: 'POST',
+          uri: `${host}/scratch/cards`,
+          headers: {
+            "Content-Type": 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            "card": {
+              "deck_id": this.state.deck.id,
             }
-        )
+          })
+        }, (error, response) => {
+            if (error || response.statusCode !== 200) {
+                return reject(new Error(response.status));
+            }
+            if(response.body[0]) {
+              const newCard = response.body[0]
+              const deck = this.state.deck;
+              this.setState(
+                  {
+                      deck: {
+                        ...deck,
+                        cards: [...deck.cards, newCard]
+                      }
+                  }
+              )
+            }
+        })
     }
 
     handleDeleteCard(event) {
@@ -102,7 +121,7 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'PUT',
-                uri: `${host}/scratch_decks/${deckId}`,
+                uri: `${host}/scratch/decks/${deckId}`,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -137,7 +156,7 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'POST',
-                uri: `${host}/scratch_decks/`,
+                uri: `${host}/scratch/decks/`,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
