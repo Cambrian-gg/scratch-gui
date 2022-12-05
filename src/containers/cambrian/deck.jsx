@@ -27,65 +27,70 @@ class Deck extends React.Component {
     }
 
     componentDidMount() {
-      const {
-        host,
-        token,
-        projectId
-      } = this.props;
-
-      xhr({
-          method: 'GET',
-          uri: `${host}/scratch/decks?project_id=${projectId}`,
-          headers: {
-            "Content-Type": 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          json: true
-      }, (error, response) => {
-          if (error || response.statusCode !== 200) {
-              return reject(new Error(response.status));
-          }
-          if(response.body[0]) {
-            this.setState(
-                {
-                    deck: response.body[0]
-                }
-            ) // take the first one as we know only how to handle the first one.
-          }
-      })
+        const {
+          host,
+          token,
+          projectId
+        } = this.props;
+        const promise = new Promise((resolve, reject) => {
+          xhr({
+              method: 'GET',
+              uri: `${host}/scratch/decks?project_id=${projectId}`,
+              headers: {
+                "Content-Type": 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              json: true
+          }, (error, response) => {
+              if (error || response.statusCode !== 200) {
+                  return reject(new Error(response.status));
+              }
+              if(response.body[0]) {
+                this.setState(
+                    {
+                        deck: response.body[0]
+                    }
+                ) // take the first one as we know only how to handle the first one.
+              }
+          })
+        })
+        Promise.all([promise])
     }
 
     handleAddCard (name) {
         name = new Date().getTime().toString()
-        xhr({
-          method: 'POST',
-          uri: `${host}/scratch/cards`,
-          headers: {
-            "Content-Type": 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            "card": {
-              "deck_id": this.state.deck.id,
-            }
+        const promise = new Promise((resolve, reject) => {
+          xhr({
+            method: 'POST',
+            uri: `${host}/scratch/cards`,
+            headers: {
+              "Content-Type": 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              "card": {
+                "deck_id": this.state.deck.id,
+              }
+            })
+          }, (error, response) => {
+              if (error || response.statusCode !== 200) {
+                  return reject(new Error(response.status));
+              }
+              if(response.body[0]) {
+                const newCard = response.body[0]
+                const deck = this.state.deck;
+                this.setState(
+                    {
+                        deck: {
+                          ...deck,
+                          cards: [...deck.cards, newCard]
+                        }
+                    }
+                )
+              }
           })
-        }, (error, response) => {
-            if (error || response.statusCode !== 200) {
-                return reject(new Error(response.status));
-            }
-            if(response.body[0]) {
-              const newCard = response.body[0]
-              const deck = this.state.deck;
-              this.setState(
-                  {
-                      deck: {
-                        ...deck,
-                        cards: [...deck.cards, newCard]
-                      }
-                  }
-              )
-            }
-        })
+       })
+      Promise.all([promise])
     }
 
     handleDeleteCard(event) {
