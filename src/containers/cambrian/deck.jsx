@@ -59,6 +59,11 @@ class Deck extends React.Component {
 
     handleAddCard (name) {
         name = new Date().getTime().toString()
+        const {
+          host,
+          token
+        } = this.props;
+
         const promise = new Promise((resolve, reject) => {
           xhr({
             method: 'POST',
