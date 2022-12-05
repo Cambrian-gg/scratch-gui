@@ -88,16 +88,16 @@ class AITab extends React.Component {
             projecId = hashMatch === null ? 0 : hashMatch[1];
         }
         return (
-            <Deck
-              host={"http://localhost:3030"}
-              token={"Vsv4eVB6bm4123xSpQgngasr"}
-              projectId={"9"}
-            />
             // <Deck
-            //   host={"https://cambrian-gg.herokuapp.com"}
-            //   token={urlParams.token}
-            //   projectId={projectId}
+            //   host={"http://localhost:3030"}
+            //   token={"Vsv4eVB6bm4123xSpQgngasr"}
+            //   projectId={"9"}
             // />
+            <Deck
+              host={"https://cambrian-gg.herokuapp.com"}
+              token={urlParams.token}
+              projectId={projectId}
+            />
         )
     }
 }
