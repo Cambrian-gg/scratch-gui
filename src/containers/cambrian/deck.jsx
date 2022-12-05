@@ -11,18 +11,19 @@ class Deck extends React.Component {
     constructor(props) {
         super(props);
           bindAll(this, [
-              'handleAddCard',
+              'handleCreateCard',
               'handleDeleteCard',
-              'handleSaveDeck'
+              'handleUpdateDeck',
+              'handleCreateDeck'
           ]);
           this.state = {
-            deck: {
-              cards: [
-                { id: "card-t-rex", name: "T-Rex", size: 4, height: 4, strength: 4, image: "https://ddd" },
-                { id: "card-stegasaurus", name: "Stegasaurus", size: 4, height: 4, strength: 4, image: "https://ddd" },
-                { id: "card-triceraptors", name: "Triceraptors", size: 4, height: 4, strength: 4, image: "https://ddd" },
-              ]
-            }
+            // deck: {
+            //   cards: [
+            //     { id: "card-t-rex", name: "T-Rex", size: 4, height: 4, strength: 4, image: "https://ddd" },
+            //     { id: "card-stegasaurus", name: "Stegasaurus", size: 4, height: 4, strength: 4, image: "https://ddd" },
+            //     { id: "card-triceraptors", name: "Triceraptors", size: 4, height: 4, strength: 4, image: "https://ddd" },
+            //   ]
+            // }
           }
     }
 
@@ -42,27 +43,40 @@ class Deck extends React.Component {
               },
               json: true
           }, (error, response) => {
+
               if (error || response.statusCode !== 200) {
+                  this.setState(
+                      {
+                          deck: undefined
+                      }
+                  )
                   return reject(new Error(response.status));
               }
-              if(response.body[0]) {
+              const lastDeck = response.body[response.body.length-1]
+              if(lastDeck) {
                 this.setState(
                     {
-                        deck: response.body[0]
+                        deck: {
+                          cards: [],
+                          ...lastDeck
+                        }
                     }
                 ) // take the first one as we know only how to handle the first one.
               }
           })
         })
-        Promise.all([promise])
+        Promise.all([promise]).catch(() => {
+          console.warn("error getting a deck")
+        })
     }
 
-    handleAddCard (name) {
-        name = new Date().getTime().toString()
+    handleCreateCard (name) {
         const {
           host,
           token
         } = this.props;
+
+        const deckId = this.state.deck.id;
 
         const promise = new Promise((resolve, reject) => {
           xhr({
@@ -74,7 +88,7 @@ class Deck extends React.Component {
             },
             body: JSON.stringify({
               "card": {
-                "deck_id": this.state.deck.id,
+                "deck_id": deckId,
               }
             })
           }, (error, response) => {
@@ -82,7 +96,7 @@ class Deck extends React.Component {
                   return reject(new Error(response.status));
               }
               if(response.body[0]) {
-                const newCard = response.body[0]
+                const newCard = JSON.parse(response.body)
                 const deck = this.state.deck;
                 this.setState(
                     {
@@ -99,30 +113,48 @@ class Deck extends React.Component {
     }
 
     handleDeleteCard(event) {
-        const newCards = this.state.deck.cards.filter(card=> {
-          return card.name != event.target.value
-        })
-        const deck = this.state.deck;
+        const {
+          host,
+          token
+        } = this.props;
 
-        this.setState(
-            {
-                deck: {
-                  ...deck,
-                  cards: newCards
+        const cardId = event.target.value;
+
+        const promise = new Promise((resolve, reject) => {
+            xhr({
+                method: 'DELETE',
+                uri: `${host}/scratch/cards/${cardId}`,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                json: true
+            }, (error, response) => {
+                if (error || response.statusCode !== 200) {
+                    return reject(new Error(response.status));
                 }
-            }
-        )
+                return resolve(response.body, host);
+            });
+        });
+        Promise.all([promise]).then(() => {
+          const newCards = this.state.deck.cards.filter(card=> {
+            return card.id != cardId
+          })
+
+          const deck = this.state.deck;
+
+          this.setState(
+              {
+                  deck: {
+                    ...deck,
+                    cards: newCards
+                  }
+              }
+          )
+        })
     }
 
-    handleSaveDeck(event) {
-        if(this.state.deck.id) {
-            this.updateDeckOnServer(this.state.deck.id);
-        } else {
-            this.createDeckOnServer();
-        }
-    }
-
-    updateDeckOnServer(deckId) {
+    handleUpdateDeck(deckId) {
         const {
           host,
           token
@@ -151,7 +183,7 @@ class Deck extends React.Component {
         Promise.all([promise])
     }
 
-    createDeckOnServer() {
+    handleCreateDeck() {
         const {
           host,
           token,
@@ -173,7 +205,6 @@ class Deck extends React.Component {
                 },
                 body: JSON.stringify({
                   "deck": {
-                    "cards": JSON.stringify(this.state.deck.cards),
                     "project_id": projectId
                   }
                 })
@@ -181,7 +212,13 @@ class Deck extends React.Component {
                 if (error || response.statusCode !== 200) {
                     return reject(new Error(response.status));
                 }
-                return resolve(response.body, host);
+                const deck = JSON.parse(response.body)
+                this.setState({
+                  deck: {
+                    cards: [],
+                    ...deck
+                  }
+                })
             });
         });
         Promise.all([promise])
@@ -192,10 +229,12 @@ class Deck extends React.Component {
             <DeckComponent
                 deck={this.state.deck}
                 onDeleteCard={this.handleDeleteCard}
-                onAddCard={this.handleAddCard}
-                onSaveDeck={this.handleSaveDeck}
+                onCreateCard={this.handleCreateCard}
+                onCreateDeck={this.handleCreateDeck}
+                onUpdateDeck={this.handleUpdateDeck}
               />
         )
+
     }
 }
 

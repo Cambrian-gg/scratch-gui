@@ -80,7 +80,8 @@ export default appTarget => {
                 backpackHost={backpackHost}
                 canSave={true}
                 canCreateNew={true}
-                projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
+                projectHost={"http://localhost:3030/scratch/projects"}
+                // projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
                 onClickLogo={onClickLogo}
             />,
         appTarget);
