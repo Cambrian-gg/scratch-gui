@@ -10,6 +10,7 @@ function DeckComponent(props) {
       onCreateDeck,
       onUpdateDeck,
       onChangeDeck,
+      onCreateCardAiGeneration,
       deck
     } = props;
 
@@ -21,6 +22,7 @@ function DeckComponent(props) {
           <td><input value={card.height}></input></td>
           <td><input value={card.strength}></input></td>
           <td><input value={card.image}></input></td>
+          <td><button onClick={onCreateCardAiGeneration} value={card.id} className="btn btn-red">Autocomplete</button></td>
           <td><button onClick={onDeleteCard} value={card.id} className="btn btn-red">Delete</button></td>
         </tr>
         )
@@ -41,6 +43,7 @@ function DeckComponent(props) {
                   <th scope="col">Height</th>
                   <th scope="col">Stregth</th>
                   <th scope="col">Image</th>
+                  <th scope="col">Autocomplete</th>
                   <th scope="col">Delete</th>
                  </tr>
               </thead>
@@ -72,6 +75,7 @@ DeckComponent.propTypes = {
     onCreateDeck: PropTypes.func,
     onUpdateDeck: PropTypes.func,
     onChangeDeck: PropTypes.func,
+    onCreateCardAiGeneration: PropTypes.func
 };
 
 export default DeckComponent;

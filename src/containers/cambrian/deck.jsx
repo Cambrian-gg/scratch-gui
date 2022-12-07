@@ -16,7 +16,8 @@ class Deck extends React.Component {
               'handleDeleteCard',
               'handleCreateDeck',
               'handleUpdateDeck',
-              'handleChangeDeck'
+              'handleChangeDeck',
+              'handleCreateCardAiGeneration'
           ]);
           this.state = {
             // deck: {
@@ -169,7 +170,7 @@ class Deck extends React.Component {
         })
     }
 
-    handleCreateCardAutocomplete(event) {
+    handleCreateCardAiGeneration(event) {
         const {
           host,
           token
@@ -180,10 +181,15 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'POST',
-                uri: `${host}/scratch/cards/${cardId}`,
+                uri: `${host}/scratch/card_ai_generations/`,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
+                },
+                body: {
+                    "card_ai_generation": {
+                        "card_id" : cardId
+                    }
                 },
                 json: true
             }, (error, response) => {
@@ -193,22 +199,7 @@ class Deck extends React.Component {
                 return resolve(response.body, host);
             });
         });
-        Promise.all([promise]).then(() => {
-          const newCards = this.state.deck.cards.filter(card=> {
-            return card.id != cardId
-          })
-
-          const deck = this.state.deck;
-
-          this.setState(
-              {
-                  deck: {
-                    ...deck,
-                    cards: newCards
-                  }
-              }
-          )
-        })
+        Promise.all([promise]).then()
     }
 
     handleCreateDeck() {
@@ -306,6 +297,7 @@ class Deck extends React.Component {
                 onCreateDeck={this.handleCreateDeck}
                 onUpdateDeck={this.handleUpdateDeck}
                 onChangeDeck={this.handleChangeDeck}
+                onCreateCardAiGeneration={this.handleCreateCardAiGeneration}
               />
         )
 
