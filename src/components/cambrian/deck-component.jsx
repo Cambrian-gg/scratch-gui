@@ -5,20 +5,22 @@ function DeckComponent(props) {
 
     const {
       onCreateCard,
+      onChangeCard,
       onDeleteCard,
       onCreateDeck,
       onUpdateDeck,
+      onChangeDeck,
       deck
     } = props;
 
     if(deck) {
       const cards = deck.cards?.map((card)=> (
-        <tr key={card.id}>
-          <td>{card.name}</td>
-          <td>{card.size}</td>
-          <td>{card.height}</td>
-          <td>{card.strength}</td>
-          <td>{card.image}</td>
+        <tr key={card.id} id={"card-"+card.id}>
+          <td><input onChange={onChangeCard} value={card.name}></input></td>
+          <td><input value={card.size}></input></td>
+          <td><input value={card.height}></input></td>
+          <td><input value={card.strength}></input></td>
+          <td><input value={card.image}></input></td>
           <td><button onClick={onDeleteCard} value={card.id} className="btn btn-red">Delete</button></td>
         </tr>
         )
@@ -28,7 +30,7 @@ function DeckComponent(props) {
         <div className="container px-4 mx-auto my-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="h1">{deck.name}</h1>
+              <h1 className="h1"><span>Deck name</span><input onChange={onChangeDeck} value={deck.name}></input></h1>
               <h2 className="h3">Card List</h2>
             </div>
             <table>
@@ -64,10 +66,12 @@ function DeckComponent(props) {
 
 DeckComponent.propTypes = {
     cards: PropTypes.arrayOf(PropTypes.object),
-    onDeleteCard: PropTypes.func,
     onCreateCard: PropTypes.func,
+    onChangeCard: PropTypes.func,
+    onDeleteCard: PropTypes.func,
     onCreateDeck: PropTypes.func,
     onUpdateDeck: PropTypes.func,
+    onChangeDeck: PropTypes.func,
 };
 
 export default DeckComponent;
