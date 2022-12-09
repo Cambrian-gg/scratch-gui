@@ -12,6 +12,9 @@ a projectHost.
 
 It should know where the backend is. 
 
+The token is issued as an API token from the projectHost. When starting it go to Profile->API Tokens
+The projectId is just an id of a project that exists in the local project host.
+
 ```jsx
 // src/containers/ai-tab.jsx
  	<Deck
