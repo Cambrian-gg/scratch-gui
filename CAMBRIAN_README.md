@@ -5,6 +5,13 @@ This is until we get funding for a next step. We don't want to spend time changi
 
 # Development
 
+## Install
+
+```bash
+nvm use v16.17.1
+npm install
+```
+
 ## Start and configure project host
 
 Modify the projectHost, token and projectId that will be used from the localhost:8601 to communicate with 
