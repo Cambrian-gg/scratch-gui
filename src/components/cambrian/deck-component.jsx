@@ -7,6 +7,8 @@ function DeckComponent(props) {
       onCreateCard,
       onChangeCard,
       onDeleteCard,
+      onChangeCategory,
+      OnChangeCategoryValue,
       onCreateDeck,
       onUpdateDeck,
       onChangeDeck,
@@ -15,18 +17,38 @@ function DeckComponent(props) {
     } = props;
 
     if(deck) {
+
+      const categories = deck.categories?.map(({id, name}) => (
+          <th key={id} scope="col"><input id={"category-"+ id} onChange={onChangeCategory} value={name}></input></th>
+        )
+      );
+
+      // TODO mkirilov this should not be here it does not follow the pattern.
+      const categoryIds = deck.categories?.map(({ id }) => id);
+
       const cards = deck.cards?.map((card)=> (
         <tr key={card.id} id={"card-"+card.id}>
           <td><input onChange={onChangeCard} value={card.name}></input></td>
-          <td><input value={card.size}></input></td>
-          <td><input value={card.height}></input></td>
-          <td><input value={card.strength}></input></td>
-          <td><input value={card.image}></input></td>
+
+          {
+            categoryIds.map((categoryId) => {
+              const categoryValue = card?.categoryValues?.filter((categoryValue) => categoryValue.cardId == card.id && categoryValue.categoryId == categoryId)[0];
+              return <td key={`${categoryId}-${card.id}`}>
+                    <input value={categoryValue?.value || ""}
+                      id={`categoryValue-${categoryValue?.id}`}
+                      data-category-id={categoryId}
+                      data-card-id={card.id}
+                      onChange={OnChangeCategoryValue}></input>
+                   </td>;
+            })
+          }
           <td><button onClick={onCreateCardAiGeneration} value={card.id} className="btn btn-red">Autocomplete</button></td>
           <td><button onClick={onDeleteCard} value={card.id} className="btn btn-red">Delete</button></td>
         </tr>
         )
       );
+
+
 
       return (
         <div className="container px-4 mx-auto my-8">
@@ -39,12 +61,7 @@ function DeckComponent(props) {
               <thead>
                 <tr>
                   <th scope="col">Name</th>
-                  <th scope="col">Size</th>
-                  <th scope="col">Height</th>
-                  <th scope="col">Stregth</th>
-                  <th scope="col">Image</th>
-                  <th scope="col">Autocomplete</th>
-                  <th scope="col">Delete</th>
+                  {categories}
                  </tr>
               </thead>
               <tbody>
@@ -72,6 +89,8 @@ DeckComponent.propTypes = {
     onCreateCard: PropTypes.func,
     onChangeCard: PropTypes.func,
     onDeleteCard: PropTypes.func,
+    onChangeCategory: PropTypes.func,
+    OnChangeCategoryValue: PropTypes.func,
     onCreateDeck: PropTypes.func,
     onUpdateDeck: PropTypes.func,
     onChangeDeck: PropTypes.func,

@@ -14,6 +14,8 @@ class Deck extends React.Component {
               'handleCreateCard',
               'handleChangeCard',
               'handleDeleteCard',
+              'handleChangeCategory',
+              'handleChangeCategoryValue',
               'handleCreateDeck',
               'handleUpdateDeck',
               'handleChangeDeck',
@@ -170,6 +172,38 @@ class Deck extends React.Component {
         })
     }
 
+    handleChangeCategory(event) {
+      const categoryId = event.target.id.split("-")[1]
+      const deck = this.state.deck;
+      const category = deck.categories.filter(({ id}) => id == categoryId )[0];
+      category.name = event.target.value;
+      this.setState({
+        ...this.state,
+        deck: deck
+      })
+  }
+
+  handleChangeCategoryValue(event) {
+    const cardId = event.target.dataset.cardId
+    const categoryId = event.target.dataset.categoryId
+    const categoryValueId = event.target.id.split("-")[1];
+
+    const deck = this.state.deck;
+    const card = deck.cards.filter(({ id }) => id == cardId)[0];
+
+    const categoryValue = card.categoryValues.filter((categoryValue) => categoryValue.cardId == cardId && categoryValue.categoryId == categoryId)[0];
+    if (categoryValue !== undefined){
+      categoryValue.value = event.target.value;
+    } else {
+      card.categoryValues.push({value: event.target.value, categoryId: categoryId, cardId: cardId})
+    }
+
+    this.setState({
+      ...this.state,
+      deck: deck
+    })
+  }
+
     handleCreateCardAiGeneration(event) {
         const {
           host,
@@ -254,14 +288,28 @@ class Deck extends React.Component {
       })
     }
 
-    handleUpdateDeck(event) {
+    handleUpdateDeck() {
         const {
           host,
           token
         } = this.props;
 
-        const deck = this.state.deck;
+        const deck = Object.assign({}, this.state.deck);
         const deckId = deck.id;
+
+        // TODO mkirilov probably should change the structure not to do the map here, but the downside is that it should
+        // be done somewhere
+        const cardAttributes = deck.cards.map((card) => {
+          const newCard = {
+            categoryValuesAttributes: card.categoryValues,
+            ...card
+          }
+          // Do not want to have categoryValues and categoryValuesAttributes, so I delete the unused.
+          // We will get unremitted params
+          delete card.categoryValues;
+          return newCard
+        });
+
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'PUT',
@@ -273,8 +321,9 @@ class Deck extends React.Component {
                 body: JSON.stringify({
                   "deck": {
                     // We expect them as cards_attributes in the API, not as cards
-                    "cards_attributes": deck.cards,
-                    "name": deck.name
+                    "cardsAttributes": cardAttributes ,
+                    "categoriesAttributes": deck.categories,
+                    "name": deck.name,
                   }
                 })
             }, (error, response) => {
@@ -294,6 +343,8 @@ class Deck extends React.Component {
                 onCreateCard={this.handleCreateCard}
                 onChangeCard={this.handleChangeCard}
                 onDeleteCard={this.handleDeleteCard}
+                onChangeCategory={this.handleChangeCategory}
+                OnChangeCategoryValue={this.handleChangeCategoryValue}
                 onCreateDeck={this.handleCreateDeck}
                 onUpdateDeck={this.handleUpdateDeck}
                 onChangeDeck={this.handleChangeDeck}
