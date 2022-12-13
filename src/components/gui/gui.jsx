@@ -293,6 +293,11 @@ const GUIComponent = props => {
                                             draggable={false}
                                             src={costumesIcon}
                                         />
+                                        <FormattedMessage
+                                            defaultMessage="Decks"
+                                            description="Button to get to the decks panel"
+                                            id="gui.gui.decksTab"
+                                        />
                                     </Tab>
                                     <Tab
                                         className={tabClassNames.tab}
