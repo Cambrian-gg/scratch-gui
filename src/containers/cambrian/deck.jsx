@@ -387,7 +387,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
   onSetGenerateImages: () => dispatch(setGenerateImages()),
-  onUnsetGenerateImages: () => dispatch(onUnsetGenerateImages())
+  onUnsetGenerateImages: () => dispatch(unsetGenerateImages())
 });
 
 export default errorBoundaryHOC('Deck')(

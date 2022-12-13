@@ -8,6 +8,12 @@ We append versions with "c" as these are CAMBRIAN versions
 
 ## [Unreleased]
 
+## [c-0.2.1] 2022-12-13
+
+### Fix
+
+	- Wrong naming for the dispatch of unset
+
 ## [c-0.2.0] 2022-12-13
 
 ### Added
