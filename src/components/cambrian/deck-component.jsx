@@ -44,6 +44,7 @@ function DeckComponent(props) {
                    </td>;
             })
           }
+          <td><img src={card.imageUrl}></img></td>
           <td><button onClick={onCreateCardAiGeneration} value={card.id} className="btn btn-red">Autocomplete</button></td>
           <td><button onClick={onDeleteCard} value={card.id} className="btn btn-red">Delete</button></td>
         </tr>
@@ -73,6 +74,7 @@ function DeckComponent(props) {
                 <tr>
                   <th scope="col">Name</th>
                   {categories}
+                  <th scope="col">Image</th>
                  </tr>
               </thead>
               <tbody>

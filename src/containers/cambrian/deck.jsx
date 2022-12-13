@@ -229,7 +229,8 @@ class Deck extends React.Component {
                 },
                 body: {
                     "card_ai_generation": {
-                        "card_id" : cardId
+                        "card_id" : cardId,
+                        "generate_images": this.props.shouldGenerateImages
                     }
                 },
                 json: true

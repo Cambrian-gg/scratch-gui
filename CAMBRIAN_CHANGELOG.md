@@ -8,6 +8,12 @@ We append versions with "c" as these are CAMBRIAN versions
 
 ## [Unreleased]
 
+## [c-0.3.0] 2022-12-13
+
+### Added
+
+	- Added the ability to visualize the image that was generated and to ask for a new image to be generated
+
 ## [c-0.2.1] 2022-12-13
 
 ### Fix
