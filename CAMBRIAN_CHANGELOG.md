@@ -8,6 +8,12 @@ We append versions with "c" as these are CAMBRIAN versions
 
 ## [Unreleased]
 
+## [c-0.2.0] 2022-12-13
+
+### Added
+
+	- Reducers for storing if we the shouldGenerateImages checkbox is selected or not. This reducer could be used for the whole decks state
+	
 ## [c-0.1.0] 2022-12-06
 
 ### Added

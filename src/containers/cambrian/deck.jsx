@@ -6,6 +6,10 @@ import { injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
 import bindAll from 'lodash.bindall';
 import xhr from 'xhr';
+import {
+    setGenerateImages,
+    unsetGenerateImages,
+} from '../../reducers/cambrian/decks';
 
 class Deck extends React.Component {
     constructor(props) {
@@ -19,7 +23,8 @@ class Deck extends React.Component {
               'handleCreateDeck',
               'handleUpdateDeck',
               'handleChangeDeck',
-              'handleCreateCardAiGeneration'
+              'handleCreateCardAiGeneration',
+              'handleGenerateImagesChanged',
           ]);
           this.state = {
             // deck: {
@@ -52,6 +57,7 @@ class Deck extends React.Component {
               if (error || response.statusCode !== 200) {
                   this.setState(
                       {
+                          ...this.state,
                           deck: undefined
                       }
                   )
@@ -61,6 +67,7 @@ class Deck extends React.Component {
               if(lastDeck) {
                 this.setState(
                     {
+                        ...this.state,
                         deck: {
                           cards: [],
                           ...lastDeck
@@ -336,6 +343,14 @@ class Deck extends React.Component {
         Promise.all([promise])
     }
 
+    handleGenerateImagesChanged(event) {
+      if(event.target.checked) {
+        this.props.onSetGenerateImages();
+      } else {
+        this.props.onUnsetGenerateImages();
+      }
+    }
+
     render () {
         return (
             <DeckComponent
@@ -349,6 +364,8 @@ class Deck extends React.Component {
                 onUpdateDeck={this.handleUpdateDeck}
                 onChangeDeck={this.handleChangeDeck}
                 onCreateCardAiGeneration={this.handleCreateCardAiGeneration}
+                isGenerateImagesSelected={this.props.shouldGenerateImages}
+                onGenerateImagesChanged={this.handleGenerateImagesChanged}
               />
         )
 
@@ -359,13 +376,18 @@ Deck.propTypes = {
   host: PropTypes.string,
   token: PropTypes.string,
   projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  shouldGenerateImages: PropTypes.bool,
 };
 
-const mapStateToProps = state => ({
-});
-
+const mapStateToProps = (state, ownProps) => {
+  return {
+    shouldGenerateImages: state.scratchGui.decks.shouldGenerateImages
+  };
+};
 
 const mapDispatchToProps = dispatch => ({
+  onSetGenerateImages: () => dispatch(setGenerateImages()),
+  onUnsetGenerateImages: () => dispatch(onUnsetGenerateImages())
 });
 
 export default errorBoundaryHOC('Deck')(

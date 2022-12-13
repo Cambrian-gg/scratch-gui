@@ -30,6 +30,8 @@ import throttle from 'redux-throttle';
 
 import decks from '../lib/libraries/decks/index.jsx';
 
+import decksReducer, {decksInitialState} from "./cambrian/decks"
+
 const guiMiddleware = compose(applyMiddleware(throttle(300, {leading: true, trailing: true})));
 
 const guiInitialState = {
@@ -45,6 +47,7 @@ const guiInitialState = {
     hoveredTarget: hoveredTargetInitialState,
     stageSize: stageSizeInitialState,
     menus: menuInitialState,
+    decks: decksInitialState,
     micIndicator: micIndicatorInitialState,
     modals: modalsInitialState,
     monitors: monitorsInitialState,
@@ -144,6 +147,7 @@ const guiReducer = combineReducers({
     hoveredTarget: hoveredTargetReducer,
     stageSize: stageSizeReducer,
     menus: menuReducer,
+    decks: decksReducer,
     micIndicator: micIndicatorReducer,
     modals: modalReducer,
     monitors: monitorReducer,

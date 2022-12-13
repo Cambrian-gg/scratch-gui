@@ -13,6 +13,8 @@ function DeckComponent(props) {
       onUpdateDeck,
       onChangeDeck,
       onCreateCardAiGeneration,
+      onGenerateImagesChanged,
+      isGenerateImagesSelected,
       deck
     } = props;
 
@@ -57,6 +59,15 @@ function DeckComponent(props) {
               <h1 className="h1"><span>Deck name</span><input onChange={onChangeDeck} value={deck.name}></input></h1>
               <h2 className="h3">Card List</h2>
             </div>
+            <p>Should generate images</p>
+            <input
+              type="checkbox"
+              name="Generate Images"
+              checked={isGenerateImagesSelected}
+              onChange={onGenerateImagesChanged}
+              className="form-check-input"
+            />
+
             <table>
               <thead>
                 <tr>
@@ -94,7 +105,9 @@ DeckComponent.propTypes = {
     onCreateDeck: PropTypes.func,
     onUpdateDeck: PropTypes.func,
     onChangeDeck: PropTypes.func,
-    onCreateCardAiGeneration: PropTypes.func
+    onCreateCardAiGeneration: PropTypes.func,
+    isGenerateImagesSelected: PropTypes.bool,
+    onGenerateImagesChanged: PropTypes.func
 };
 
 export default DeckComponent;
