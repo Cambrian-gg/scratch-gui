@@ -7,24 +7,31 @@ This is until we get funding for a next step. We don't want to spend time changi
 
 ## Start and configure project host
 
-Modify the projectHost, token and projectId that will be used from the localhost:8601 to communicate with
-a projectHost.
+Modify the projectHost and decksHost in the render-gui. They will be used from the localhost:8601 to communicate with
+the platform
 
 It should know where the backend is.
 
-The token is issued as an API token from the projectHost. When starting it go to Profile->API Tokens
-The projectId is just an id of a project that exists in the local project host.
+The token is issued as an API token from the platofmr. When starting the Platform go to Profile->API Tokens
 
 ```jsx
-// src/containers/ai-tab.jsx
- 	<Deck
-		// Back end host
-	  host={"http://localhost:3030"}
-		// Token from Profile->API Tokens of the Back end
-	  token={"Vsv4eVB6bm4123xSpQgngasr"}
-		// Id of a project created on the Back end, must exist
-	  projectId={"9"}
-	/>
+// src/playground/render-gui.jsx
+   <WrappedGui
+        canEditTitle
+        backpackVisible
+        showComingSoon
+        backpackHost={backpackHost}
+        canSave={true}
+        canCreateNew={true}
+        projectToken={urlParams.token}
+        // projectHost={"http://localhost:3030/scratch/projects"}
+        projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
+        // decksHost={"http://localhost:3030/scratch"}
+        decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
+        // assetHost={"http://localhost:3030/scratch/assets"}
+        // assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
+        onClickLogo={onClickLogo}
+    />
 ```
 
 Then do
@@ -33,7 +40,9 @@ Then do
 npm start
 ```
 
-Then go to [http://localhost:8601/](http://localhost:8601/) - the playground outputs the default GUI component
+Then go to [http://localhost:8601/?token=XXX](http://localhost:8601/) - the playground outputs the default GUI component
+
+XXX is the token that is issued by the platform.
 
 ## Deployment
 
