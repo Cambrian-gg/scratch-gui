@@ -91,19 +91,22 @@ class AITab extends React.Component {
             // <Deck
             //   host={"http://localhost:3030"}
             //   token={"Vsv4eVB6bm4123xSpQgngasr"}
-            //   projectId={"9"}
+            //   projectId={"17"}
+            //   vm={this.props.vm}
             // />
             <Deck
               host={"https://cambrian-gg.herokuapp.com"}
               token={urlParams.token}
               projectId={projectId}
+              vm={this.props.vm}
             />
         )
     }
 }
 
 AITab.propTypes = {
-  reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  vm: PropTypes.instanceOf(VM)
 };
 
 const mapStateToProps = state => {

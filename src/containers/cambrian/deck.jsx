@@ -11,6 +11,9 @@ import {
     unsetGenerateImages,
 } from '../../reducers/cambrian/decks';
 
+import {costumeUpload} from '../../lib/file-uploader.js';
+import VM from 'scratch-vm';
+
 class Deck extends React.Component {
     constructor(props) {
         super(props);
@@ -25,16 +28,9 @@ class Deck extends React.Component {
               'handleChangeDeck',
               'handleCreateCardAiGeneration',
               'handleGenerateImagesChanged',
+              'handleCreateCostumeFromCard'
           ]);
-          this.state = {
-            // deck: {
-            //   cards: [
-            //     { id: "card-t-rex", name: "T-Rex", size: 4, height: 4, strength: 4, image: "https://ddd" },
-            //     { id: "card-stegasaurus", name: "Stegasaurus", size: 4, height: 4, strength: 4, image: "https://ddd" },
-            //     { id: "card-triceraptors", name: "Triceraptors", size: 4, height: 4, strength: 4, image: "https://ddd" },
-            //   ]
-            // }
-          }
+          this.state = {}
     }
 
     componentDidMount() {
@@ -124,12 +120,16 @@ class Deck extends React.Component {
       Promise.all([promise])
     }
 
+    getCardWithId(cardId) {
+        return this.state.deck.cards.filter((card)=> {
+            return card.id == cardId
+        })[0]
+    }
+
     handleChangeCard(event) {
         const cardId = event.target.parentElement.parentElement.id.split("-")[1]
         const deck = this.state.deck;
-        const card = deck.cards.filter((card)=> {
-            return card.id == cardId
-        })[0]
+        const card = this.getCardWithId(cardId)
         card.name = event.target.value
         this.setState({
           ...this.state,
@@ -188,28 +188,28 @@ class Deck extends React.Component {
         ...this.state,
         deck: deck
       })
-  }
-
-  handleChangeCategoryValue(event) {
-    const cardId = event.target.dataset.cardId
-    const categoryId = event.target.dataset.categoryId
-    const categoryValueId = event.target.id.split("-")[1];
-
-    const deck = this.state.deck;
-    const card = deck.cards.filter(({ id }) => id == cardId)[0];
-
-    const categoryValue = card.categoryValues.filter((categoryValue) => categoryValue.cardId == cardId && categoryValue.categoryId == categoryId)[0];
-    if (categoryValue !== undefined){
-      categoryValue.value = event.target.value;
-    } else {
-      card.categoryValues.push({value: event.target.value, categoryId: categoryId, cardId: cardId})
     }
 
-    this.setState({
-      ...this.state,
-      deck: deck
-    })
-  }
+    handleChangeCategoryValue(event) {
+      const cardId = event.target.dataset.cardId
+      const categoryId = event.target.dataset.categoryId
+      const categoryValueId = event.target.id.split("-")[1];
+
+      const deck = this.state.deck;
+      const card = deck.cards.filter(({ id }) => id == cardId)[0];
+
+      const categoryValue = card.categoryValues.filter((categoryValue) => categoryValue.cardId == cardId && categoryValue.categoryId == categoryId)[0];
+      if (categoryValue !== undefined){
+        categoryValue.value = event.target.value;
+      } else {
+        card.categoryValues.push({value: event.target.value, categoryId: categoryId, cardId: cardId})
+      }
+
+      this.setState({
+        ...this.state,
+        deck: deck
+      })
+    }
 
     handleCreateCardAiGeneration(event) {
         const {
@@ -345,11 +345,57 @@ class Deck extends React.Component {
     }
 
     handleGenerateImagesChanged(event) {
-      if(event.target.checked) {
-        this.props.onSetGenerateImages();
-      } else {
-        this.props.onUnsetGenerateImages();
-      }
+        if(event.target.checked) {
+          this.props.onSetGenerateImages();
+        } else {
+          this.props.onUnsetGenerateImages();
+        }
+    }
+
+    handleCreateCostumeFromCard(event) {
+        const card = this.getCardWithId(event.target.value)
+        const url = card.imageUrl;
+        const storage = this.props.vm.runtime.storage;
+
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not OK');
+            }
+            return response.blob();
+          })
+          .then((blob) => {
+            return new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+                fileReader.onload = () => resolve(fileReader.result);
+                fileReader.readAsDataURL(blob);
+            });
+          })
+          .then((data)=> {
+            costumeUpload(data,"image/png", storage, vmCostumes => {
+               vmCostumes.forEach((costume, i) => {
+                    costume.name = `${card.name}${i ? i + 1 : ''}`;
+                });
+                this.handleNewCostume(vmCostumes, false, null).then(() => {
+                });
+            },()=>{console.log("here")})
+            console.log(data)
+          })
+          .catch((error) => {
+            console.error('There has been a problem with your fetch operation:', error);
+          });
+
+    }
+
+    handleNewCostume (costume, targetId) {
+        const costumes = Array.isArray(costume) ? costume : [costume];
+
+        return Promise.all(costumes.map(c => {
+            // If targetId is falsy, VM should default it to editingTarget.id
+            // However, targetId should be provided to prevent #5876,
+            // if making new costume takes a while
+            return this.props.vm.addCostume(c.md5, c, targetId);
+        }));
     }
 
     render () {
@@ -367,6 +413,7 @@ class Deck extends React.Component {
                 onCreateCardAiGeneration={this.handleCreateCardAiGeneration}
                 isGenerateImagesSelected={this.props.shouldGenerateImages}
                 onGenerateImagesChanged={this.handleGenerateImagesChanged}
+                onCreateCostumeFromCard={this.handleCreateCostumeFromCard}
               />
         )
 
@@ -378,6 +425,7 @@ Deck.propTypes = {
   token: PropTypes.string,
   projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   shouldGenerateImages: PropTypes.bool,
+  vm: PropTypes.instanceOf(VM)
 };
 
 const mapStateToProps = (state, ownProps) => {

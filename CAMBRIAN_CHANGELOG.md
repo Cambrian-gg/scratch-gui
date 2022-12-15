@@ -8,6 +8,12 @@ We append versions with "c" as these are CAMBRIAN versions
 
 ## [Unreleased]
 
+## [c-0.4.0] 2022-12-15
+
+### Added
+
+	- Added the ability to create a costume from the card
+
 ## [c-0.3.0] 2022-12-13
 
 ### Added
