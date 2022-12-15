@@ -80,24 +80,11 @@ class AITab extends React.Component {
     }
 
     render () {
-        let projectId = this.props.reduxProjectId;
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const urlParams = Object.fromEntries(urlSearchParams.entries());
-        if(projectId == null || projectId == undefined) {
-            const hashMatch = window.location.hash.match(/#(\d+)/);
-            projecId = hashMatch === null ? 0 : hashMatch[1];
-        }
         return (
-            // <Deck
-            //   host={"http://localhost:3030"}
-            //   token={"Vsv4eVB6bm4123xSpQgngasr"}
-            //   projectId={"17"}
-            //   vm={this.props.vm}
-            // />
             <Deck
-              host={"https://cambrian-gg.herokuapp.com"}
-              token={urlParams.token}
-              projectId={projectId}
+              decksHost={this.props.decksHost}
+              projectToken={this.props.projectToken}
+              projectId={this.props.reduxProjectId}
               vm={this.props.vm}
             />
         )
@@ -106,6 +93,8 @@ class AITab extends React.Component {
 
 AITab.propTypes = {
   reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  projectToken: PropTypes.string,
+  decksHost: PropTypes.string,
   vm: PropTypes.instanceOf(VM)
 };
 

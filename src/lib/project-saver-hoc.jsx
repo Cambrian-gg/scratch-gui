@@ -218,6 +218,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
          */
         storeProject (projectId, requestParams) {
             requestParams = requestParams || {};
+            requestParams.token = this.props.projectToken
             this.clearAutoSaveTimeout();
             // Serialize VM state now before embarking on
             // the asynchronous journey of storing assets to

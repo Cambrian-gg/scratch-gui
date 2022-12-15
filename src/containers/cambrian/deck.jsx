@@ -35,17 +35,17 @@ class Deck extends React.Component {
 
     componentDidMount() {
         const {
-          host,
-          token,
+          decksHost,
+          projectToken,
           projectId
         } = this.props;
         const promise = new Promise((resolve, reject) => {
           xhr({
               method: 'GET',
-              uri: `${host}/scratch/decks?project_id=${projectId}`,
+              uri: `${decksHost}/decks?project_id=${projectId}`,
               headers: {
                 "Content-Type": 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${projectToken}`
               },
               json: true
           }, (error, response) => {
@@ -80,8 +80,8 @@ class Deck extends React.Component {
 
     handleCreateCard (name) {
         const {
-          host,
-          token
+          decksHost,
+          projectToken
         } = this.props;
 
         const deckId = this.state.deck.id;
@@ -89,10 +89,10 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
           xhr({
             method: 'POST',
-            uri: `${host}/scratch/cards`,
+            uri: `${decksHost}/cards`,
             headers: {
               "Content-Type": 'application/json',
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${projectToken}`
             },
             body: JSON.stringify({
               "card": {
@@ -139,8 +139,8 @@ class Deck extends React.Component {
 
     handleDeleteCard(event) {
         const {
-          host,
-          token
+          decksHost,
+          projectToken
         } = this.props;
 
         const cardId = event.target.value;
@@ -148,17 +148,17 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'DELETE',
-                uri: `${host}/scratch/cards/${cardId}`,
+                uri: `${decksHost}/cards/${cardId}`,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${projectToken}`
                 },
                 json: true
             }, (error, response) => {
                 if (error || response.statusCode !== 200) {
                     return reject(new Error(response.status));
                 }
-                return resolve(response.body, host);
+                return resolve(response.body, decksHost);
             });
         });
         Promise.all([promise]).then(() => {
@@ -213,8 +213,8 @@ class Deck extends React.Component {
 
     handleCreateCardAiGeneration(event) {
         const {
-          host,
-          token
+          decksHost,
+          projectToken
         } = this.props;
 
         const cardId = event.target.value;
@@ -222,10 +222,10 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'POST',
-                uri: `${host}/scratch/card_ai_generations/`,
+                uri: `${decksHost}/card_ai_generations/`,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${projectToken}`
                 },
                 body: {
                     "card_ai_generation": {
@@ -238,7 +238,7 @@ class Deck extends React.Component {
                 if (error || response.statusCode !== 200) {
                     return reject(new Error(response.status));
                 }
-                return resolve(response.body, host);
+                return resolve(response.body, decksHost);
             });
         });
         Promise.all([promise]).then()
@@ -246,8 +246,8 @@ class Deck extends React.Component {
 
     handleCreateDeck() {
         const {
-          host,
-          token,
+          decksHost,
+          projectToken,
           projectId
         } = this.props;
 
@@ -259,10 +259,10 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'POST',
-                uri: `${host}/scratch/decks/`,
+                uri: `${decksHost}/decks/`,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${projectToken}`
                 },
                 body: JSON.stringify({
                   "deck": {
@@ -298,8 +298,8 @@ class Deck extends React.Component {
 
     handleUpdateDeck() {
         const {
-          host,
-          token
+          decksHost,
+          projectToken
         } = this.props;
 
         const deck = Object.assign({}, this.state.deck);
@@ -321,10 +321,10 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'PUT',
-                uri: `${host}/scratch/decks/${deckId}`,
+                uri: `${decksHost}/decks/${deckId}`,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${projectToken}`
                 },
                 body: JSON.stringify({
                   "deck": {
@@ -338,7 +338,7 @@ class Deck extends React.Component {
                 if (error || response.statusCode !== 200) {
                     return reject(new Error(response.status));
                 }
-                return resolve(response.body, host);
+                return resolve(response.body, decksHost);
             });
         });
         Promise.all([promise])
@@ -421,8 +421,8 @@ class Deck extends React.Component {
 }
 
 Deck.propTypes = {
-  host: PropTypes.string,
-  token: PropTypes.string,
+  decksHost: PropTypes.string,
+  projectToken: PropTypes.string,
   projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   shouldGenerateImages: PropTypes.bool,
   vm: PropTypes.instanceOf(VM)

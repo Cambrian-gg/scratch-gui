@@ -12,17 +12,16 @@ import storage from '../lib/storage';
  * @property {?boolean} params.isCopy a flag indicating if this save is creating a copy.
  * @property {?boolean} params.isRemix a flag indicating if this save is creating a remix.
  * @property {?string} params.title the title of the project.
+ * @property {?token} params.token the token for authorization
  * @return {Promise} A promise that resolves when the network request resolves.
  */
 export default function (projectId, vmState, params) {
-    const urlSearchParams = new URLSearchParams(window.location.search);
-    const urlParams = Object.fromEntries(urlSearchParams.entries());
     const opts = {
         body: vmState,
         // If we set json:true then the body is double-stringified, so don't
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${urlParams.token}`
+            'Authorization': `Bearer ${params.token}`
         },
         withCredentials: true
     };

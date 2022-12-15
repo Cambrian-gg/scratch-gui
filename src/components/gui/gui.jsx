@@ -143,7 +143,9 @@ const GUIComponent = props => {
 
     return (<MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
         const stageSize = resolveStageSize(stageSizeMode, isFullSize);
-
+        // need to filter them to remove the projectToken as otherwise there is
+        // a warning that it gets to the DOM
+      const { projectToken, decksHost, ...filteredProps } = componentProps;
         return isPlayerOnly ? (
             <StageWrapper
                 isFullScreen={isFullScreen}
@@ -161,7 +163,7 @@ const GUIComponent = props => {
             <Box
                 className={styles.pageWrapper}
                 dir={isRtl ? 'rtl' : 'ltr'}
-                {...componentProps}
+                {...filteredProps}
             >
                 {telemetryModalVisible ? (
                     <TelemetryModal
@@ -348,7 +350,11 @@ const GUIComponent = props => {
                                     {costumesTabVisible ? <CostumeTab vm={vm} /> : null}
                                 </TabPanel>
                                  <TabPanel className={tabClassNames.tabPanel}>
-                                    {aiTabVisible ? <AITab vm={vm} /> : null}
+                                    {aiTabVisible ? <AITab vm={vm}
+                                                      projectToken={projectToken}
+                                                      decksHost={decksHost}
+                                                       /> : null}
+                                                      }
                                 </TabPanel>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {soundsTabVisible ? <SoundTab vm={vm} /> : null}

@@ -61,6 +61,9 @@ export default appTarget => {
         window.onbeforeunload = () => true;
     }
 
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const urlParams = Object.fromEntries(urlSearchParams.entries());
+
     ReactDOM.render(
         // important: this is checking whether `simulateScratchDesktop` is truthy, not just defined!
         simulateScratchDesktop ?
@@ -80,8 +83,13 @@ export default appTarget => {
                 backpackHost={backpackHost}
                 canSave={true}
                 canCreateNew={true}
+                projectToken={urlParams.token}
                 // projectHost={"http://localhost:3030/scratch/projects"}
                 projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
+                // decksHost={"http://localhost:3030/scratch"}
+                decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
+                // assetHost={"http://localhost:3030/scratch/assets"}
+                // assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
                 onClickLogo={onClickLogo}
             />,
         appTarget);
