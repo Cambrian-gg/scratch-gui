@@ -354,7 +354,6 @@ const GUIComponent = props => {
                                                       projectToken={projectToken}
                                                       decksHost={decksHost}
                                                        /> : null}
-                                                      }
                                 </TabPanel>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {soundsTabVisible ? <SoundTab vm={vm} /> : null}
