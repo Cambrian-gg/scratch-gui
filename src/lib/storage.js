@@ -59,7 +59,12 @@ class Storage extends ScratchStorage {
         this.assetHost = assetHost;
     }
     getAssetGetConfig (asset) {
-        return `${this.assetHost}/internalapi/asset/${asset.assetId}.${asset.dataFormat}/get/`;
+        return {
+            url: `${this.assetHost}/${asset.assetId}.${asset.dataFormat}`,
+            headers: {
+                'Authorization': `Bearer ${this.projectToken}`
+            }
+        }
     }
     getAssetCreateConfig (asset) {
         return {
@@ -68,6 +73,11 @@ class Storage extends ScratchStorage {
             // assetId as part of the create URI. So, force the method to POST.
             // Then when storage finds this config to use for the "update", still POSTs
             method: 'post',
+            headers: {
+                'Authorization': `Bearer ${this.projectToken}`,
+                // Need this header for the assets for rails to be able to read them
+                'Content-Type': 'application/octet-stream'
+            },
             url: `${this.assetHost}/${asset.assetId}.${asset.dataFormat}`,
             withCredentials: true
         };

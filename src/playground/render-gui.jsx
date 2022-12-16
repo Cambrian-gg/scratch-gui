@@ -85,11 +85,11 @@ export default appTarget => {
                 canCreateNew={true}
                 projectToken={urlParams.token}
                 // projectHost={"http://localhost:3030/scratch/projects"}
-                projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
                 // decksHost={"http://localhost:3030/scratch"}
-                decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
                 // assetHost={"http://localhost:3030/scratch/assets"}
-                // assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
+                projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
+                decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
+                assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
                 onClickLogo={onClickLogo}
             />,
         appTarget);

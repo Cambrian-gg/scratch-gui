@@ -8,6 +8,12 @@ We append versions with "c" as these are CAMBRIAN versions
 
 ## [Unreleased]
 
+## [c-0.4.1] 2022-12-16
+
+### Fixed
+
+	- Save the costumes on the assets server
+
 ## [c-0.4.0] 2022-12-15
 
 ### Added
