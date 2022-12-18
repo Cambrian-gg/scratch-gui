@@ -61,9 +61,9 @@ class Storage extends ScratchStorage {
     getAssetGetConfig (asset) {
         return {
             url: `${this.assetHost}/${asset.assetId}.${asset.dataFormat}`,
-            headers: {
-                'Authorization': `Bearer ${this.projectToken}`
-            }
+            // headers: {
+            //     'Authorization': `Bearer ${this.projectToken}`
+            // }
         }
     }
     getAssetCreateConfig (asset) {
