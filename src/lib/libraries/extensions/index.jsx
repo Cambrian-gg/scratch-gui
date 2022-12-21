@@ -48,6 +48,24 @@ import gdxforConnectionSmallIconURL from './gdxfor/gdxfor-small.svg';
 
 export default [
     {
+        name: 'Cambrian Decks',
+        extensionId: 'cambrianDecks',
+        collaborator: 'Cambrian',
+        description: (
+            <FormattedMessage
+                defaultMessage="Develop card games like TopTrumps."
+                description="Cambrian Decks extension provides blocks for developing games with decks and cards"
+                id="gui.extension.cambrian.decks.description"
+            />
+        ),
+        featured: true,
+        disabled: false,
+        internetConnectionRequired: true,
+        connectionIconURL: ev3ConnectionIconURL,
+        connectionSmallIconURL: ev3ConnectionSmallIconURL,
+        helpLink: 'https://cambrian-gg.herokuapp.com/extensions/'
+    },
+    {
         name: (
             <FormattedMessage
                 defaultMessage="Music"
