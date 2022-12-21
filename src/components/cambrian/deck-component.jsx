@@ -45,7 +45,7 @@ function DeckComponent(props) {
                    </td>;
             })
           }
-          <td><img src={card.imageUrl}></img></td>
+          <td><img style={ {"maxWidth": "100px", "maxHeight": "100px"} } src={card.imageUrl}></img></td>
           <td><button onClick={onCreateCardAiGeneration} value={card.id} className="btn btn-red">Autocomplete</button></td>
           <td><button onClick={onCreateCostumeFromCard} value={card.id} className="btn btn-red">Create costume</button></td>
           <td><button onClick={onDeleteCard} value={card.id} className="btn btn-red">Delete</button></td>
@@ -62,16 +62,27 @@ function DeckComponent(props) {
               <h1 className="h1"><span>Deck name</span><input onChange={onChangeDeck} value={deck.name}></input></h1>
               <h2 className="h3">Card List</h2>
             </div>
-            <p>Should generate images</p>
-            <input
-              type="checkbox"
-              name="Generate Images"
-              checked={isGenerateImagesSelected}
-              onChange={onGenerateImagesChanged}
-              className="form-check-input"
-            />
+            <p>Should generate images
+              <input
+                type="checkbox"
+                name="Generate Images"
+                checked={isGenerateImagesSelected}
+                onChange={onGenerateImagesChanged}
+                className="form-check-input"
+              />
+            </p>
 
-            <table>
+
+            <table
+            // This should not be inline, but leaving this for testing purposes
+              style={
+                {
+                  "overflowY": "scroll",
+                  "display": "block",
+                  "maxHeight": "70vh"
+                }
+              }
+            >
               <thead>
                 <tr>
                   <th scope="col">Name</th>

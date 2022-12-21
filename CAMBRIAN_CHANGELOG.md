@@ -6,7 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 We append versions with "c" as these are CAMBRIAN versions
 
+# Types of changes
+
+Added for new features.
+Changed for changes in existing functionality.
+Deprecated for soon-to-be removed features.
+Removed for now removed features.
+Fixed for any bug fixes.
+Security in case of vulnerabilities.
+
 ## [Unreleased]
+
+## [c-0.4.2] 2022-12-16
+
+### Changed
+
+	- The table how has a scroll
+	- The checkbox for generating images is on the same line
+	- The image has max-height
 
 ## [c-0.4.1] 2022-12-16
 
@@ -37,7 +54,7 @@ We append versions with "c" as these are CAMBRIAN versions
 ### Added
 
 	- Reducers for storing if we the shouldGenerateImages checkbox is selected or not. This reducer could be used for the whole decks state
-	
+
 ## [c-0.1.0] 2022-12-06
 
 ### Added

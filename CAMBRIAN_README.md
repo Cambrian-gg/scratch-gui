@@ -12,7 +12,7 @@ the platform
 
 It should know where the backend is.
 
-The token is issued as an API token from the platofmr. When starting the Platform go to Profile->API Tokens
+The token is issued as an API token from the platform. When starting the Platform go to Profile->API Tokens
 
 ```jsx
 // src/playground/render-gui.jsx
