@@ -77,7 +77,7 @@ function DeckComponent(props) {
             // This should not be inline, but leaving this for testing purposes
               style={
                 {
-                  "overflowY": "scroll",
+                  "overflowY": "auto",
                   "display": "block",
                   "maxHeight": "70vh"
                 }
