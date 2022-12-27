@@ -47,7 +47,6 @@ function DeckComponent(props) {
           }
           <td><img style={ {"maxWidth": "100px", "maxHeight": "100px"} } src={card.imageUrl}></img></td>
           <td><button onClick={onCreateCardAiGeneration} value={card.id} className="btn btn-red">Autocomplete</button></td>
-          <td><button onClick={onCreateCostumeFromCard} value={card.id} className="btn btn-red">Create costume</button></td>
           <td><button onClick={onDeleteCard} value={card.id} className="btn btn-red">Delete</button></td>
         </tr>
         )
@@ -124,7 +123,6 @@ DeckComponent.propTypes = {
     onCreateCardAiGeneration: PropTypes.func,
     isGenerateImagesSelected: PropTypes.bool,
     onGenerateImagesChanged: PropTypes.func,
-    onCreateCostumeFromCard: PropTypes.func
 };
 
 export default DeckComponent;
