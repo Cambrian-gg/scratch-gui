@@ -17,6 +17,11 @@ Security in case of vulnerabilities.
 
 ## [Unreleased]
 
+### Added
+
+- CambrianHOC that helps us communicate between the editor and the extension. In the extension we have access only to the runtime. We put an object runtime.cambrian and in it we store the projectId and the decksHost that we need for the load project block in the extension
+
+
 ## [c-0.4.2] 2022-12-16
 
 ### Changed
