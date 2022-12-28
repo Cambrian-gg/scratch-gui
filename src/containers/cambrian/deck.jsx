@@ -9,6 +9,7 @@ import xhr from 'xhr';
 import {
     setGenerateImages,
     unsetGenerateImages,
+    setShouldGenerateImagesWasSet,
 } from '../../reducers/cambrian/decks';
 
 import {costumeUpload} from '../../lib/file-uploader.js';
@@ -35,7 +36,13 @@ class Deck extends React.Component {
     }
 
     componentDidMount() {
-       const {
+        // set it by default and remember that we've set it
+        if(this.props.shouldGenerateImages==false && this.props.shouldGenerateImagesWasSet==undefined) {
+          this.props.onSetGenerateImages()
+          this.props.onSetShouldGeneratedImagesWasSet()
+        }
+
+        const {
           vm
         } = this.props;
         // Brute force sync them all. We sync names, pictures
@@ -597,18 +604,21 @@ Deck.propTypes = {
   projectToken: PropTypes.string,
   projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   shouldGenerateImages: PropTypes.bool,
+  shouldGenerateImagesWasSet: PropTypes.bool,
   vm: PropTypes.instanceOf(VM)
 };
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    shouldGenerateImages: state.scratchGui.decks.shouldGenerateImages
+    shouldGenerateImages: state.scratchGui.decks.shouldGenerateImages,
+    shouldGenerateImagesWasSet: state.scratchGui.decks.shouldGenerateImagesWasSet
   };
 };
 
 const mapDispatchToProps = dispatch => ({
   onSetGenerateImages: () => dispatch(setGenerateImages()),
-  onUnsetGenerateImages: () => dispatch(unsetGenerateImages())
+  onUnsetGenerateImages: () => dispatch(unsetGenerateImages()),
+  onSetShouldGeneratedImagesWasSet: () => dispatch(setShouldGenerateImagesWasSet())
 });
 
 export default errorBoundaryHOC('Deck')(
