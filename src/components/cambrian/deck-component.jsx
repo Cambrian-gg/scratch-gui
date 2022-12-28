@@ -6,6 +6,7 @@ function DeckComponent(props) {
     const {
       onCreateCard,
       onChangeCard,
+      onUpdateCard,
       onDeleteCard,
       onChangeCategory,
       OnChangeCategoryValue,
@@ -31,7 +32,7 @@ function DeckComponent(props) {
 
       const cards = deck.cards?.map((card)=> (
         <tr key={card.id} id={"card-"+card.id}>
-          <td><input onChange={onChangeCard} value={card.name}></input></td>
+          <td><input onChange={onChangeCard} onBlur={onUpdateCard} value={card.name}></input></td>
 
           {
             categoryIds.map((categoryId) => {
@@ -41,7 +42,8 @@ function DeckComponent(props) {
                       id={`categoryValue-${categoryValue?.id}`}
                       data-category-id={categoryId}
                       data-card-id={card.id}
-                      onChange={OnChangeCategoryValue}></input>
+                      onChange={OnChangeCategoryValue}
+                      onBlur={onUpdateCard}></input>
                    </td>;
             })
           }
@@ -96,7 +98,6 @@ function DeckComponent(props) {
             </table>
             <button onClick={onCreateCard} className="btn btn-white">Create Card</button>
           </div>
-          <button onClick={onUpdateDeck} className="btn btn-white">Update deck</button>
         </div>
       );
     }
@@ -113,8 +114,9 @@ function DeckComponent(props) {
 DeckComponent.propTypes = {
     cards: PropTypes.arrayOf(PropTypes.object),
     onCreateCard: PropTypes.func,
-    onChangeCard: PropTypes.func,
     onDeleteCard: PropTypes.func,
+    onChangeCard: PropTypes.func,
+    onUpdateCard: PropTypes.func,
     onChangeCategory: PropTypes.func,
     OnChangeCategoryValue: PropTypes.func,
     onCreateDeck: PropTypes.func,

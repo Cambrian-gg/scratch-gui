@@ -19,8 +19,9 @@ class Deck extends React.Component {
         super(props);
           bindAll(this, [
               'handleCreateCard',
-              'handleChangeCard',
               'handleDeleteCard',
+              'handleChangeCard',
+              'handleUpdateCard',
               'handleChangeCategory',
               'handleChangeCategoryValue',
               'handleCreateDeck',
@@ -28,12 +29,76 @@ class Deck extends React.Component {
               'handleChangeDeck',
               'handleCreateCardAiGeneration',
               'handleGenerateImagesChanged',
-              'handleCreateCostumeFromCard'
           ]);
           this.state = {}
     }
 
     componentDidMount() {
+       const {
+          vm
+        } = this.props;
+        // Brute force sync them all. We sync names, pictures
+        // and position. We will upload them all back to the server
+        // and make post request. But doing it smarter requires a
+        // much smarter API of what changed with the card, when and
+        // how, in order to chagne only what changed.
+        // One of the things is the url of the pictures. This url
+        // contains a signature and this signature is different
+        // each time so we can not such compare the url of the image
+        // and decide if we should change the image.
+        //
+        // It will take about a day to figure how to do it in smart way here
+
+        // this.createCardInCostumes(card);
+        //
+        // We first delete all the costumes and then crete the new ones
+        // to avoid indexOf issues that occur when reordering the cards
+        // in the createCardInCostumes
+        this.loadDeckFromServer().then(()=> {
+            return this.emptyCostumes()
+        }).then(()=> {
+            return this.recreateCostumesFromCards();
+        }).then(()=> {
+            return this.reorderCostumeBasedOnCards();
+        })
+    }
+
+    componentDidUpdate() {
+        console.log("componentDidUpdate")
+    }
+
+
+    emptyCostumes() {
+        const deck = this.state.deck;
+        deck.cards.forEach((card)=> {
+          this.deleteCardFromCostumes(card.id);
+        })
+        return deck;
+    }
+
+    recreateCostumesFromCards() {
+        const deck = this.state.deck;
+        const allCreatePromises = deck.cards.map((card)=> {
+          return this.createCardInCostumes(card)
+        })
+        return Promise.all(allCreatePromises)
+    }
+
+    reorderCostumeBasedOnCards() {
+        const {
+          vm
+        } = this.props;
+        // now we reorder them as the creates were in a promise
+        const deck = this.state.deck;
+        for(let i = 0; i < deck.cards.length; i++) {
+          const card = deck.cards[i]
+          const currentCostumeIndex = vm.editingTarget.getCostumes().findIndex(c=> c.name.startsWith(`card-${card.id}-`))
+          const newCostumeIndex = i;
+          vm.editingTarget.reorderCostume(currentCostumeIndex, i)
+        }
+    }
+
+    loadDeckFromServer() {
         const {
           decksHost,
           projectToken,
@@ -61,25 +126,39 @@ class Deck extends React.Component {
               }
               const lastDeck = response.body[response.body.length-1]
               if(lastDeck) {
-                this.setState(
-                    {
-                        ...this.state,
-                        deck: {
+                const deck =  {
                           cards: [],
                           ...lastDeck
                         }
+                this.setState(
+                    {
+                        ...this.state,
+                        deck: deck
+
                     }
                 ) // take the first one as we know only how to handle the first one.
+                resolve(deck)
               }
           })
         })
-        Promise.all([promise]).catch(() => {
-          console.warn("error getting a deck")
-        })
+        return Promise.all([promise])
     }
 
     handleCreateCard (name) {
-        const {
+        this.createCardOnServer(name).then((newCard)=> {
+          return this.createCardInDeckComponent(newCard)
+        }).then((newCard) => {
+          return this.createCardInCostumes(newCard)
+        })
+    }
+
+    /**
+     * Get the name,and return the promise that resolves
+     * when the card is create on the server.
+     * Resolve with the 'card' response from the server
+     */
+    createCardOnServer(name) {
+       const {
           decksHost,
           projectToken
         } = this.props;
@@ -105,47 +184,91 @@ class Deck extends React.Component {
               }
               if(response.body[0]) {
                 const newCard = JSON.parse(response.body)
-                const deck = this.state.deck;
-                this.setState(
-                    {
-                        deck: {
-                          ...deck,
-                          cards: [...deck.cards, newCard]
-                        }
-                    }
-                )
+                resolve(newCard);
               }
           })
-       })
-      Promise.all([promise])
+        })
+        return promise;
     }
 
-    getCardWithId(cardId) {
-        return this.state.deck.cards.filter((card)=> {
-            return card.id == cardId
-        })[0]
+    createCardInDeckComponent(newCard) {
+        return new Promise((resolve, reject)=>{
+            const deck = this.state.deck;
+            this.setState(
+                {
+                    deck: {
+                      ...deck,
+                      cards: [...deck.cards, newCard]
+                    }
+                }
+            )
+            resolve(newCard);
+        });
     }
 
-    handleChangeCard(event) {
-        const cardId = event.target.parentElement.parentElement.id.split("-")[1]
-        const deck = this.state.deck;
-        const card = this.getCardWithId(cardId)
-        card.name = event.target.value
-        this.setState({
-          ...this.state,
-          deck: deck
+    /**
+     * Creates a costume based on the card.
+     *
+     * @return a promise that will resovle when the card is create. Resolve with the costume as param
+     */
+    createCardInCostumes(card) {
+        const url = card.imageUrl;
+        const storage = this.props.vm.runtime.storage;
+        const vm = this.props.vm;
+        // We need to return a promise to resolve after adding the costume
+        // Otherwise we don't know when this addition will happen
+        // We want the whole method to resolve then.
+        return new Promise((resolve, reject)=> {
+            fetch(url)
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Network response was not OK');
+                }
+                return response.blob();
+              }).then((blob) => {
+                return new Promise((resolveFileReader, reject) => {
+                    const fileReader = new FileReader();
+                    fileReader.onload = () => resolveFileReader(fileReader.result);
+                    fileReader.readAsDataURL(blob);
+                });
+              }).then((data)=> {
+                  costumeUpload(data,"image/png", storage, vmCostumes => {
+                      vmCostumes.forEach((costume, i) => {
+                          costume.name = `card-${card.id}-${card.name}`;
+                      });
+                      this.addCostume(vmCostumes, false, null).then(() => {
+                          const costume = vmCostumes[0];
+                          const index = this.props.vm.editingTarget.getCostumes().indexOf(costume)
+                          const newIndex = this.state.deck.cards.indexOf(card)
+                          vm.editingTarget.reorderCostume(index, newIndex)
+                          resolve(costume)
+                      });
+                  },()=>{
+                    console.log("here")
+                  })
+              }).catch((error) => {
+                console.error('There has been a problem with your fetch operation:', error);
+              });
         })
     }
 
     handleDeleteCard(event) {
+        const cardId = event.target.value;
+        const deleteFromServerPromise = this.deleteCardFromServer(cardId)
+        deleteFromServerPromise.then(() => {
+          this.deleteCardFromDeckComponent(cardId)
+        }).then(() => {
+          this.deleteCardFromCostumes(cardId);
+        })
+    }
+
+    deleteCardFromServer(cardId) {
         const {
           decksHost,
           projectToken
         } = this.props;
 
-        const cardId = event.target.value;
-
-        const promise = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             xhr({
                 method: 'DELETE',
                 uri: `${decksHost}/cards/${cardId}`,
@@ -161,22 +284,78 @@ class Deck extends React.Component {
                 return resolve(response.body, decksHost);
             });
         });
-        Promise.all([promise]).then(() => {
-          const newCards = this.state.deck.cards.filter(card=> {
-            return card.id != cardId
-          })
+    }
 
-          const deck = this.state.deck;
+    deleteCardFromCostumes(cardId) {
+        const {
+            vm
+        } = this.props;
 
-          this.setState(
-              {
-                  deck: {
-                    ...deck,
-                    cards: newCards
-                  }
-              }
-          )
+        const costumes = vm.editingTarget.sprite.costumes_.filter(costume=> costume.name.startsWith(`card-${cardId}-`))
+        costumes.forEach(costume => {
+          const index = vm.editingTarget.sprite.costumes_.indexOf(costume)
+          vm.editingTarget.deleteCostume(index);
         })
+    }
+
+    deleteCardFromDeckComponent(cardId) {
+        const newCards = this.state.deck.cards.filter(card=> {
+          return card.id != cardId
+        })
+
+        const deck = this.state.deck;
+
+        this.setState(
+            {
+                deck: {
+                  ...deck,
+                  cards: newCards
+                }
+            }
+        )
+    }
+
+    handleChangeCard(event) {
+        const cardId = event.target.parentElement.parentElement.id.split("-")[1]
+        const deck = this.state.deck;
+        const card = this.getCardWithId(cardId)
+        card.name = event.target.value
+        this.setState({
+          ...this.state,
+          deck: deck
+        })
+    }
+
+    handleUpdateCard(event) {
+        const cardId = event.target.parentElement.parentElement.id.split("-")[1]
+        const deck = this.state.deck;
+        const card = this.getCardWithId(cardId)
+        // don't update a specific card. Update the whole deck on the server
+        this.updateDeckOnServer().then(()=> {
+          // This update happens only if we change categories or names
+          // The image could change only from the server
+          this.updateCostumeNameFromCard(card)
+        })
+    }
+
+    updateCostumeNameFromCard(card) {
+        // I should find a way to do this only if the name has changed.
+        // Not to do it on every change.
+        // This comes later when we have a "change API"
+        const {
+          vm
+        } = this.props;
+
+        const costume = vm.editingTarget.getCostumes().filter(c=> c.name.startsWith(`card-${card.id}-`))[0]
+        if(costume) {
+          costume.name = `card-${card.id}-${card.name}`
+        }
+    }
+
+    getCardWithId(cardId) {
+        return this.state.deck.cards.filter((card)=> {
+            return card.id == cardId
+        })[0]
     }
 
     handleChangeCategory(event) {
@@ -297,12 +476,16 @@ class Deck extends React.Component {
     }
 
     handleUpdateDeck() {
+        this.updateDeckOnServer()
+    }
+
+    updateDeckOnServer() {
+        const deck = Object.assign({}, this.state.deck);
         const {
           decksHost,
           projectToken
         } = this.props;
 
-        const deck = Object.assign({}, this.state.deck);
         const deckId = deck.id;
 
         // TODO mkirilov probably should change the structure not to do the map here, but the downside is that it should
@@ -341,7 +524,7 @@ class Deck extends React.Component {
                 return resolve(response.body, decksHost);
             });
         });
-        Promise.all([promise])
+        return Promise.all([promise])
     }
 
     handleGenerateImagesChanged(event) {
@@ -352,42 +535,7 @@ class Deck extends React.Component {
         }
     }
 
-    handleCreateCostumeFromCard(event) {
-        const card = this.getCardWithId(event.target.value)
-        const url = card.imageUrl;
-        const storage = this.props.vm.runtime.storage;
-
-        fetch(url)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error('Network response was not OK');
-            }
-            return response.blob();
-          })
-          .then((blob) => {
-            return new Promise((resolve, reject) => {
-                const fileReader = new FileReader();
-                fileReader.onload = () => resolve(fileReader.result);
-                fileReader.readAsDataURL(blob);
-            });
-          })
-          .then((data)=> {
-            costumeUpload(data,"image/png", storage, vmCostumes => {
-               vmCostumes.forEach((costume, i) => {
-                    costume.name = `${card.name}${i ? i + 1 : ''}`;
-                });
-                this.handleNewCostume(vmCostumes, false, null).then(() => {
-                });
-            },()=>{console.log("here")})
-            console.log(data)
-          })
-          .catch((error) => {
-            console.error('There has been a problem with your fetch operation:', error);
-          });
-
-    }
-
-    handleNewCostume (costume, targetId) {
+    addCostume (costume, targetId) {
         const costumes = Array.isArray(costume) ? costume : [costume];
 
         return Promise.all(costumes.map(c => {
@@ -405,6 +553,7 @@ class Deck extends React.Component {
                 onCreateCard={this.handleCreateCard}
                 onChangeCard={this.handleChangeCard}
                 onDeleteCard={this.handleDeleteCard}
+                onUpdateCard={this.handleUpdateCard}
                 onChangeCategory={this.handleChangeCategory}
                 OnChangeCategoryValue={this.handleChangeCategoryValue}
                 onCreateDeck={this.handleCreateDeck}
@@ -413,7 +562,6 @@ class Deck extends React.Component {
                 onCreateCardAiGeneration={this.handleCreateCardAiGeneration}
                 isGenerateImagesSelected={this.props.shouldGenerateImages}
                 onGenerateImagesChanged={this.handleGenerateImagesChanged}
-                onCreateCostumeFromCard={this.handleCreateCostumeFromCard}
               />
         )
 
