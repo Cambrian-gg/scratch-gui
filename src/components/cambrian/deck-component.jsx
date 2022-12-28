@@ -60,7 +60,7 @@ function DeckComponent(props) {
         <div className="container px-4 mx-auto my-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="h1"><span>Deck name</span><input onChange={onChangeDeck} value={deck.name}></input></h1>
+              <h1 className="h1"><span>Deck name</span><input onChange={onChangeDeck} onBlur={onUpdateDeck} value={deck.name}></input></h1>
               <h2 className="h3">Card List</h2>
             </div>
             <p>Should generate images
