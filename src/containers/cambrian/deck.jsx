@@ -74,6 +74,21 @@ class Deck extends React.Component {
         deck.cards.forEach((card)=> {
           this.deleteCardFromCostumes(card.id);
         })
+        // along with deleting all the costumes for cards that are existing
+        // we delete the costumes for cards that are not existing
+        // We need this because of when a project is forked. When it is
+        // there are costumes with card-'id' where there is not card with this id
+        // as the card was duplicated
+        const {
+          vm
+        } = this.props;
+
+        const costumes = vm.editingTarget.getCostumes().filter(costume => costume.name.startsWith(`card-`))
+        costumes.forEach(costume => {
+          const index = vm.editingTarget.getCostumes().indexOf(costume)
+          vm.editingTarget.deleteCostume(index);
+        })
+
         return deck;
     }
 
