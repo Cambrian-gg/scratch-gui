@@ -28,6 +28,7 @@ class Deck extends React.Component {
               'handleUpdateDeck',
               'handleChangeDeck',
               'handleCreateCardAiGeneration',
+              'handleCreateCardAiGenerationForAll',
               'handleGenerateImagesChanged',
           ]);
           this.state = {}
@@ -391,14 +392,18 @@ class Deck extends React.Component {
     }
 
     handleCreateCardAiGeneration(event) {
-        const {
+        const cardId = event.target.value;
+
+        this.createCardAiGeneration(cardId)
+    }
+
+    createCardAiGeneration(cardId) {
+       const {
           decksHost,
           projectToken
         } = this.props;
 
-        const cardId = event.target.value;
-
-        const promise = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             xhr({
                 method: 'POST',
                 uri: `${decksHost}/card_ai_generations/`,
@@ -420,7 +425,10 @@ class Deck extends React.Component {
                 return resolve(response.body, decksHost);
             });
         });
-        Promise.all([promise]).then()
+    }
+
+    handleCreateCardAiGenerationForAll(event) {
+        return this.state.deck.cards.map(card=> this.createCardAiGeneration(card.id))
     }
 
     handleCreateDeck() {
@@ -497,7 +505,7 @@ class Deck extends React.Component {
           }
           // Do not want to have categoryValues and categoryValuesAttributes, so I delete the unused.
           // We will get unremitted params
-          delete card.categoryValues;
+          delete newCard.categoryValues;
           return newCard
         });
 
@@ -562,6 +570,7 @@ class Deck extends React.Component {
                 onCreateCardAiGeneration={this.handleCreateCardAiGeneration}
                 isGenerateImagesSelected={this.props.shouldGenerateImages}
                 onGenerateImagesChanged={this.handleGenerateImagesChanged}
+                onAutocompleteAll={this.handleCreateCardAiGenerationForAll}
               />
         )
 

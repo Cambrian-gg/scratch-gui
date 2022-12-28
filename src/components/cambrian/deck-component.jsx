@@ -17,6 +17,7 @@ function DeckComponent(props) {
       onGenerateImagesChanged,
       isGenerateImagesSelected,
       onCreateCostumeFromCard,
+      onAutocompleteAll,
       deck
     } = props;
 
@@ -72,6 +73,7 @@ function DeckComponent(props) {
                 className="form-check-input"
               />
             </p>
+            <button onClick={onAutocompleteAll} className="btn btn-red">Autocomplete all</button>
 
 
             <table
@@ -125,6 +127,7 @@ DeckComponent.propTypes = {
     onCreateCardAiGeneration: PropTypes.func,
     isGenerateImagesSelected: PropTypes.bool,
     onGenerateImagesChanged: PropTypes.func,
+    onAutocompleteAll: PropTypes.func,
 };
 
 export default DeckComponent;
