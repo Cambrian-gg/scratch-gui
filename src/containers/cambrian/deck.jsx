@@ -14,6 +14,7 @@ import {
 
 import {costumeUpload} from '../../lib/file-uploader.js';
 import VM from 'scratch-vm';
+import consumer from "../../cable.js"
 
 class Deck extends React.Component {
     constructor(props) {
@@ -42,6 +43,30 @@ class Deck extends React.Component {
           this.props.onSetShouldGeneratedImagesWasSet()
         }
 
+        this.refreshDeck()
+
+        consumer.subscriptions.create({
+            channel: 'DecksChannel',
+            username: 'kmitov@axlessoft.com',
+        }, {
+            connected: () => console.log('connected'),
+            disconnected: () => console.log('disconnected'),
+            received: data => {
+              console.log("receive event for deck. Updating")
+              this.refreshDeck();
+            }
+        })
+    }
+
+    componentDidUpdate() {
+        console.log("componentDidUpdate")
+    }
+
+    componentWillUnmount() {
+        consumer.disconnect()
+    };
+
+    refreshDeck() {
         const {
           vm
         } = this.props;
@@ -70,41 +95,39 @@ class Deck extends React.Component {
             return this.reorderCostumeBasedOnCards();
         })
     }
-
-    componentDidUpdate() {
-        console.log("componentDidUpdate")
-    }
-
-
     emptyCostumes() {
         const deck = this.state.deck;
-        deck.cards.forEach((card)=> {
-          this.deleteCardFromCostumes(card.id);
-        })
-        // along with deleting all the costumes for cards that are existing
-        // we delete the costumes for cards that are not existing
-        // We need this because of when a project is forked. When it is
-        // there are costumes with card-'id' where there is not card with this id
-        // as the card was duplicated
-        const {
-          vm
-        } = this.props;
+        if(deck) {
+            deck.cards.forEach((card)=> {
+              this.deleteCardFromCostumes(card.id);
+            })
+            // along with deleting all the costumes for cards that are existing
+            // we delete the costumes for cards that are not existing
+            // We need this because of when a project is forked. When it is
+            // there are costumes with card-'id' where there is not card with this id
+            // as the card was duplicated
+            const {
+              vm
+            } = this.props;
 
-        const costumes = vm.editingTarget.getCostumes().filter(costume => costume.name.startsWith(`card-`))
-        costumes.forEach(costume => {
-          const index = vm.editingTarget.getCostumes().indexOf(costume)
-          vm.editingTarget.deleteCostume(index);
-        })
+            const costumes = vm.editingTarget.getCostumes().filter(costume => costume.name.startsWith(`card-`))
+            costumes.forEach(costume => {
+              const index = vm.editingTarget.getCostumes().indexOf(costume)
+              vm.editingTarget.deleteCostume(index);
+            })
 
-        return deck;
+            return deck;
+        }
     }
 
     recreateCostumesFromCards() {
         const deck = this.state.deck;
-        const allCreatePromises = deck.cards.map((card)=> {
-          return this.createCardInCostumes(card)
-        })
-        return Promise.all(allCreatePromises)
+        if(deck) {
+            const allCreatePromises = deck.cards.map((card)=> {
+              return this.createCardInCostumes(card)
+            })
+            return Promise.all(allCreatePromises)
+        }
     }
 
     reorderCostumeBasedOnCards() {
@@ -113,11 +136,13 @@ class Deck extends React.Component {
         } = this.props;
         // now we reorder them as the creates were in a promise
         const deck = this.state.deck;
-        for(let i = 0; i < deck.cards.length; i++) {
-          const card = deck.cards[i]
-          const currentCostumeIndex = vm.editingTarget.getCostumes().findIndex(c=> c.name.startsWith(`card-${card.id}-`))
-          const newCostumeIndex = i;
-          vm.editingTarget.reorderCostume(currentCostumeIndex, i)
+        if(deck) {
+            for(let i = 0; i < deck.cards.length; i++) {
+              const card = deck.cards[i]
+              const currentCostumeIndex = vm.editingTarget.getCostumes().findIndex(c=> c.name.startsWith(`card-${card.id}-`))
+              const newCostumeIndex = i;
+              vm.editingTarget.reorderCostume(currentCostumeIndex, i)
+            }
         }
     }
 
@@ -444,6 +469,15 @@ class Deck extends React.Component {
                 if (error || response.statusCode !== 200) {
                     return reject(new Error(response.status));
                 }
+                const card = response.body
+                const deck = this.state.deck;
+                const index = deck.cards.findIndex(c=> c.id == card.id)
+                deck.cards[index] = card
+                this.setState({
+                  ...this.state,
+                  deck: deck
+                })
+
                 return resolve(response.body, decksHost);
             });
         });
