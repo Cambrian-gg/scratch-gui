@@ -261,6 +261,7 @@ class Deck extends React.Component {
      */
     createCardInCostumes(card) {
         const url = card.imageUrl;
+        url=url+`?time=${Date.now()}`
         const storage = this.props.vm.runtime.storage;
         const vm = this.props.vm;
         // We need to return a promise to resolve after adding the costume
