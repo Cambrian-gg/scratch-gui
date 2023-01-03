@@ -212,6 +212,7 @@ class Deck extends React.Component {
         } = this.props;
 
         const deckId = this.state.deck.id;
+        this.setState({...this.state, isLoading: true});
 
         const promise = new Promise((resolve, reject) => {
           xhr({
@@ -232,6 +233,7 @@ class Deck extends React.Component {
               }
               if(response.body[0]) {
                 const newCard = JSON.parse(response.body)
+                this.setState({...this.state, isLoading: false});
                 resolve(newCard);
               }
           })
@@ -364,7 +366,7 @@ class Deck extends React.Component {
     }
 
     handleChangeCard(event) {
-        const cardId = event.target.parentElement.parentElement.id.split("-")[1]
+        const cardId = event.target.dataset.cardId;
         const deck = this.state.deck;
         const card = this.getCardWithId(cardId)
         card.name = event.target.value
@@ -375,14 +377,15 @@ class Deck extends React.Component {
     }
 
     handleUpdateCard(event) {
-        const cardId = event.target.parentElement.parentElement.id.split("-")[1]
-        const deck = this.state.deck;
+        const cardId = event.target.dataset.cardId;
         const card = this.getCardWithId(cardId)
         // don't update a specific card. Update the whole deck on the server
         this.updateDeckOnServer().then(()=> {
           // This update happens only if we change categories or names
           // The image could change only from the server
           this.updateCostumeNameFromCard(card)
+        }).catch(error => {
+          console.log("Error: ", error)
         })
     }
 
@@ -407,7 +410,7 @@ class Deck extends React.Component {
     }
 
     handleChangeCategory(event) {
-      const categoryId = event.target.id.split("-")[1]
+      const categoryId = event.target.dataset.categoryId;
       const deck = this.state.deck;
       const category = deck.categories.filter(({ id}) => id == categoryId )[0];
       category.name = event.target.value;
@@ -418,9 +421,8 @@ class Deck extends React.Component {
     }
 
     handleChangeCategoryValue(event) {
-      const cardId = event.target.dataset.cardId
-      const categoryId = event.target.dataset.categoryId
-      const categoryValueId = event.target.id.split("-")[1];
+      const cardId = event.target.dataset.cardId;
+      const categoryId = event.target.dataset.categoryId;
 
       const deck = this.state.deck;
       const card = deck.cards.filter(({ id }) => id == cardId)[0];
@@ -450,6 +452,7 @@ class Deck extends React.Component {
           projectToken
         } = this.props;
 
+        this.setState({...this.state, isLoading: true});
         return new Promise((resolve, reject) => {
             xhr({
                 method: 'POST',
@@ -475,7 +478,8 @@ class Deck extends React.Component {
                 deck.cards[index] = card
                 this.setState({
                   ...this.state,
-                  deck: deck
+                  deck: deck,
+                  isLoading: false,
                 })
 
                 return resolve(response.body, decksHost);
@@ -565,6 +569,8 @@ class Deck extends React.Component {
           return newCard
         });
 
+        this.setState({...this.state, isLoading: true});
+
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'PUT',
@@ -585,10 +591,15 @@ class Deck extends React.Component {
                 if (error || response.statusCode !== 200) {
                     return reject(new Error(response.status));
                 }
+                // We need to update the deck with the deck from the response otherwise we will try to create category_value twice,
+                // because we are not providing the ID. Have two category_values for the same card/category is not permitted, because it makes no sense.
+                // This is the most Rails way I could think of. If we have problems with this update, we can implement on the Back End a way to distinguish
+                // creating from updating category_values without providing category_value.id, but it will not follow the accept_nested_attribute rules.
+                this.setState({...this.state, deck: JSON.parse(response.body), isLoading: false})
                 return resolve(response.body, decksHost);
             });
         });
-        return Promise.all([promise])
+        return Promise.all([promise]);
     }
 
     handleGenerateImagesChanged(event) {
@@ -627,6 +638,7 @@ class Deck extends React.Component {
                 isGenerateImagesSelected={this.props.shouldGenerateImages}
                 onGenerateImagesChanged={this.handleGenerateImagesChanged}
                 onAutocompleteAll={this.handleCreateCardAiGenerationForAll}
+                isLoading={this.state.isLoading}
               />
         )
 

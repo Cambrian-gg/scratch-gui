@@ -26,6 +26,23 @@ future 0.4.3 version as I want to sync the versions and for this to be 0.4 as th
 - Adding the autocomplete all button
 - Listening for events over websocker on the decks:ai_generation_steam. Updating the cards when receiving an event
 
+## [c-0.4.2.1] 2023-01-03
+
+### Added
+- Tailwind CDN in the global render gui. Next steps is to include it from NPM
+- Added a loading spinner.
+
+### Changed
+- The look and feel of the deck page using Tailwindui.
+- The way we derive the ids of card/category, no more going to parent ids. Using dataset of current element is way better.
+
+### Fixed
+- Fixed not working update of the category values, it was due to not being able to update accept_nested_Attributes, because we did not include the id coming from the server. Now we are updating the deck with what the server responds.
+- Fixed categories not being able to autochange
+
+### Removed
+- Not used onCreateCostumeFromCard parameter
+
 ## [c-0.4.2] 2022-12-16
 
 ### Changed
