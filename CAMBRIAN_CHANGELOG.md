@@ -26,6 +26,14 @@ future 0.4.3 version as I want to sync the versions and for this to be 0.4 as th
 - Adding the autocomplete all button
 - Listening for events over websocker on the decks:ai_generation_steam. Updating the cards when receiving an event
 
+## [c-0.4.2.2] 2023-01-04
+
+### Changed
+- The scroll now only scrolls the table and not the elements above it.
+
+### Added
+- We have a horizontal scroll for the table. I have tested it with two resolutions 1920x1080 and 1280x720. The second one needs a horizontal scroll, because the information is too much.
+
 ## [c-0.4.2.1] 2023-01-03
 
 ### Added

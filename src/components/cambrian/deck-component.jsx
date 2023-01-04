@@ -24,9 +24,9 @@ function DeckComponent(props) {
       const isLoading = props.isLoading || deck.cards.some( card => card.aiGenerationJobId);
 
       const categories = deck.categories?.map((category) => (
-          <th key={category.id} scope="col" className="">
+          <th key={category.id} scope="col" className="px-2">
             <input
-              className="block mx-auto text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
+              className="block w-32 mx-auto text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
               onChange={onChangeCategory}
               onBlur={onUpdateDeck}
               data-category-id={category.id}
@@ -45,9 +45,9 @@ function DeckComponent(props) {
               <div className="h-20 w-20 flex-shrink-0">
                 <img className="h-20 w-20 rounded-sm" src={card.imageUrl}></img>
               </div>
-              <div className="ml-4 w-full">
+              <div className="ml-4">
                 <input
-                  className="block mx-auto w-full pl-2 rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
+                  className="block mx-auto w-36 pl-2 rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
                   onChange={onChangeCard}
                   onBlur={onUpdateCard}
                   value={card.name}
@@ -64,7 +64,7 @@ function DeckComponent(props) {
               const categoryValue = card?.categoryValues?.filter((categoryValue) => categoryValue.cardId == card.id && categoryValue.categoryId == categoryId)[0];
               return <td key={`${categoryId}-${card.id}`}>
                     <input value={categoryValue?.value || ""}
-                      className="block mx-auto w-6/12 text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
+                      className="block mx-auto w-8/12 text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
                       id={`categoryValue-${categoryValue?.id}`}
                       data-category-id={categoryId}
                       data-card-id={card.id}
@@ -74,8 +74,7 @@ function DeckComponent(props) {
                    </td>;
             })
           }
-          <td className="text-center">
-
+          <td className="text-center whitespace-nowrap px-2">
             <button onClick={onCreateCardAiGeneration} value={card.id} className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Autocomplete</button>
             <button onClick={onDeleteCard} value={card.id} className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-red-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-400 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Delete</button>
           </td>
@@ -87,7 +86,6 @@ function DeckComponent(props) {
 
       return (
         <div className="px-2 py-4 w-full bg-white space-y-4 flex flex-col">
-
           <div>
             <label htmlFor="deckName" className="block text-sm font-medium text-gray-700">
               Deck name
@@ -102,9 +100,7 @@ function DeckComponent(props) {
               />
             </div>
           </div>
-
-          <div className="grow h-1 overflow-auto p-2">
-
+          <div>
             <h2 className="h3">Card List</h2>
 
             <label>
@@ -123,19 +119,24 @@ function DeckComponent(props) {
                 </svg>
                 }
             </div>
-
-            <table className="mt-2 min-w-full divide-y divide-gray-300 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="">Name</th>
-                  { categories }
-                  <th scope="col" className="">Costume</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                { cards }
-              </tbody>
-            </table>
+          </div>
+          {/* This height is arbitrary for the scroll it is dependant on the height of the child which is the table */}
+          <div className="grow h-1 overflow-auto px-2">
+            {/* This width is arbitrary for the scroll it is dependant on the height of the child which is the table */}
+            <div className="w-1">
+              <table className="mt-2 min-w-full divide-y divide-gray-300 shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                <thead className="bg-gray-50 sticky top-0 z-10">
+                  <tr>
+                    <th scope="col" className="">Name</th>
+                    { categories }
+                    <th scope="col" className="">Costume</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  { cards }
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
