@@ -21,7 +21,7 @@ function DeckComponent(props) {
     } = props;
 
     if(deck) {
-      const isLoading = props.isLoading || deck.cards.some( card => card.aiGenerationJobId);
+      const isLoading = props.isLoading || deck.cards.some( card => card.cardAiGenerations.length > 0);
 
       const categories = deck.categories?.map((category) => (
           <th key={category.id} scope="col" className="">
@@ -54,7 +54,7 @@ function DeckComponent(props) {
                   data-card-id={card.id}
                   >
                 </input>
-                { card.aiGenerationJobId && <span>Autocompleting please wait...</span> }
+                { card.cardAiGenerations.length > 0 && <span>Autocompleting please wait...</span> }
               </div>
             </div>
           </td>
