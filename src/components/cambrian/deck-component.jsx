@@ -21,7 +21,7 @@ function DeckComponent(props) {
     } = props;
 
     if(deck) {
-      const isLoading = props.isLoading || deck.cards.some( card => card.cardAiGenerations.length > 0);
+      const isLoading = props.isLoading || deck.cards.some( card => card.cardAiGenerations.some(cag=> cag["completedAt"] == null));
 
       const categories = deck.categories?.map((category) => (
           <th key={category.id} scope="col" className="px-2">
@@ -54,7 +54,14 @@ function DeckComponent(props) {
                   data-card-id={card.id}
                   >
                 </input>
-                { card.cardAiGenerations.length > 0 && <span>Autocompleting please wait...</span> }
+                { card.cardAiGenerations.some(cag => cag["completedAt"] == null) && <span>Autocompleting please wait...</span> }
+                {
+                  // Not the best way. I am not sure how much of information should we expose to the outside world
+                  // Should we get into the details of what failed - like a key, or request or something.
+                  // Should we make a distinction between "at capacity" and "an error occurred".
+                  // Until more requirements come I am just exposing the message
+                  card.cardAiGenerations.some(cag => cag["rawResponse"] && cag["rawResponse"]["code"] != "200") && <span>Could not get a result from AI. Probably it's busy...</span>
+                }
               </div>
             </div>
           </td>
