@@ -45,9 +45,10 @@ function DeckComponent(props) {
               <div className="h-20 w-20 flex-shrink-0">
                 <img className="h-20 w-20 rounded-sm" src={card.imageUrl}></img>
               </div>
-              <div className="ml-4">
+              <div className="ml-4 w-full">
                 <input
-                  className="block mx-auto w-36 pl-2 rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
+                  style={{ minWidth: "8rem" }}
+                  className="block mx-auto w-full pl-2 rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
                   onChange={onChangeCard}
                   onBlur={onUpdateCard}
                   value={card.name}
@@ -129,8 +130,7 @@ function DeckComponent(props) {
           </div>
           {/* This height is arbitrary for the scroll it is dependant on the height of the child which is the table */}
           <div className="grow h-1 overflow-auto px-2">
-            {/* This width is arbitrary for the scroll it is dependant on the height of the child which is the table */}
-            <div className="w-1">
+            <div>
               <table className="mt-2 min-w-full divide-y divide-gray-300 shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
