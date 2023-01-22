@@ -45,7 +45,7 @@ export default appTarget => {
     const backpackHostMatches = window.location.href.match(/[?&]backpack_host=([^&]*)&?/);
     const backpackHost = backpackHostMatches ? backpackHostMatches[1] : null;
 
-    const projectHostMatches = window.location.href.match(/[?&]project_host=([^&]*)&?/)
+    const projectHostMatches = window.location.href.match(/[?&]game_host=([^&]*)&?/)
     const projectHost = projectHostMatches ? projectHostMatches[1] : null;
 
     const deckHostMatchers = window.location.href.match(/[?&]deck_host=([^&]*)&?/)
@@ -95,10 +95,10 @@ export default appTarget => {
                 canSave={true}
                 canCreateNew={true}
                 projectToken={urlParams.token}
-                // projectHost={projectHost || "http://localhost:3030/scratch/projects"}
+                // projectHost={projectHost || "http://localhost:3030/scratch/games"}
                 // decksHost={deckHost || "http://localhost:3030/scratch"}
                 // assetHost={assetHost || "http://localhost:3030/scratch/assets"}
-                projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
+                projectHost={"https://cambrian-gg.herokuapp.com/scratch/games"}
                 decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
                 assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
                 onClickLogo={onClickLogo}
