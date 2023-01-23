@@ -9,7 +9,7 @@ import HashParserHOC from '../lib/hash-parser-hoc.jsx';
 import log from '../lib/log.js';
 
 const onClickLogo = () => {
-    window.location = 'https://scratch.mit.edu';
+    window.location = 'https://cambrian-gg.herokuapp.com';
 };
 
 const handleTelemetryModalCancel = () => {
@@ -102,6 +102,7 @@ export default appTarget => {
                 decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
                 assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
                 onClickLogo={onClickLogo}
+                logo="https://cambrian-gg.herokuapp.com/assets/text-logo-dadaf9faac43fab06d46fadac4736e61b148d203fc656759f3dbf30a6aaabaaf.png"
             />,
         appTarget);
 };
