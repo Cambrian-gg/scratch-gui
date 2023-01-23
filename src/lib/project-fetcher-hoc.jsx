@@ -15,6 +15,9 @@ import {
     projectError,
     setProjectId
 } from '../reducers/project-state';
+
+import {setProjectTitle} from '../reducers/project-title';
+
 import {
     activateTab,
     BLOCKS_TAB_INDEX
@@ -76,7 +79,24 @@ const ProjectFetcherHOC = function (WrappedComponent) {
                 .load(storage.AssetType.Project, projectId, storage.DataFormat.JSON)
                 .then(projectAsset => {
                     if (projectAsset) {
-                        this.props.onFetchedProjectData(projectAsset.data, loadingState);
+                        if(loadingState == "FETCHING_WITH_ID") {
+                          // loadingState = "FETCHING_WITH_ID"
+                          // loadingState = "FETCHING_NEW_DEFAULT"
+                            // By default scratch expects us to return only the data from the project host
+                            // But we need a place for the name of the game also, so we return
+                            // the name of the game. Instead of overriding methods in the scratch-vm
+                            // we override them here.
+                            // It encodes the data in the storage. Don't know why - probably to calculate the hash
+                            // In this sense we might need the hash as scratch is heavily using it.
+                            // TextDecoder = require('text-encoding').TextDecoder
+                            const decoded = new TextDecoder().decode(projectAsset.data)
+                            const game = JSON.parse(decoded)["game"]
+                            projectAsset.data = new TextEncoder().encode(JSON.stringify(game["data"]))
+                            this.props.onFetchedProjectData(projectAsset.data, loadingState);
+                            this.props.setProjectTitle(game["title"])
+                        } else {
+                            this.props.onFetchedProjectData(projectAsset.data, loadingState);
+                        }
                     } else {
                         // Treat failure to load as an error
                         // Throw to be caught by catch later on
@@ -152,6 +172,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
         onError: error => dispatch(projectError(error)),
         onFetchedProjectData: (projectData, loadingState) =>
             dispatch(onFetchedProjectData(projectData, loadingState)),
+        setProjectTitle: projectTitle => dispatch(setProjectTitle(projectTitle)),
         setProjectId: projectId => dispatch(setProjectId(projectId)),
         onProjectUnchanged: () => dispatch(setProjectUnchanged())
     });
