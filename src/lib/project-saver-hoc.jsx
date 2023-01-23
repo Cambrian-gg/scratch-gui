@@ -9,6 +9,7 @@ import log from '../lib/log';
 import storage from '../lib/storage';
 import dataURItoBlob from '../lib/data-uri-to-blob';
 import saveProjectToServer from '../lib/save-project-to-server';
+import {setProjectTitle} from '../reducers/project-title';
 
 import {
     showAlertWithTimeout,
@@ -154,8 +155,9 @@ const ProjectSaverHOC = function (WrappedComponent) {
         }
         updateProjectToStorage () {
             this.props.onShowSavingAlert();
-            return this.storeProject(this.props.reduxProjectId)
-                .then(() => {
+            return this.storeProject(this.props.reduxProjectId, {
+              title: this.props.reduxProjectTitle
+            }).then(() => {
                     // there's an http response object available here, but we don't need to examine
                     // it, because there are no values contained in it that we care about
                     this.props.onUpdatedProject(this.props.loadingState);
@@ -248,9 +250,13 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 .then(() => this.props.onUpdateProjectData(projectId, savedVMState, requestParams))
                 .then(response => {
                     this.props.onSetProjectUnchanged();
-                    const id = response.id.toString();
+                    const id = response.id && response.id.toString();
+                    const title = response.title && response.title.toString()
                     if (id && this.props.onUpdateProjectThumbnail) {
                         this.storeProjectThumbnail(id);
+                    }
+                    if(title && title != this.props.reduxProjectTitle) {
+                        this.props.onUpdateProjectTitle(title);
                     }
                     this.reportTelemetryEvent('projectDidSave');
                     return response;
@@ -391,6 +397,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         onShowSavingAlert: PropTypes.func,
         onUpdateProjectData: PropTypes.func.isRequired,
         onUpdateProjectThumbnail: PropTypes.func,
+        onUpdateProjectTitle: PropTypes.func,
         onUpdatedProject: PropTypes.func,
         projectChanged: PropTypes.bool,
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -442,7 +449,8 @@ const ProjectSaverHOC = function (WrappedComponent) {
         onShowSaveSuccessAlert: () => showAlertWithTimeout(dispatch, 'saveSuccess'),
         onShowSavingAlert: () => showAlertWithTimeout(dispatch, 'saving'),
         onUpdatedProject: loadingState => dispatch(doneUpdatingProject(loadingState)),
-        setAutoSaveTimeoutId: id => dispatch(setAutoSaveTimeoutId(id))
+        setAutoSaveTimeoutId: id => dispatch(setAutoSaveTimeoutId(id)),
+        onUpdateProjectTitle: title => dispatch(setProjectTitle(title)),
     });
     // Allow incoming props to override redux-provided props. Used to mock in tests.
     const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign(

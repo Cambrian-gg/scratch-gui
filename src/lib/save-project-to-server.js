@@ -16,8 +16,27 @@ import storage from '../lib/storage';
  * @return {Promise} A promise that resolves when the network request resolves.
  */
 export default function (projectId, vmState, params) {
+    const body = {
+        game: {
+            data: JSON.parse(vmState)
+        },
+    }
+    // This is the layer for converting
+    // scratch projects to cambrian games
+    // Title to name is here.
+    if (params.hasOwnProperty('title')) {
+        body["game"]["name"] = params.title;
+    }
+    const creatingProject = projectId === null || typeof projectId === 'undefined';
+    const queryParams = {};
+    if (params.hasOwnProperty('originalId')) queryParams.original_id = params.originalId;
+    if (params.hasOwnProperty('isCopy')) queryParams.is_copy = params.isCopy;
+    if (params.hasOwnProperty('isRemix')) queryParams.is_remix = params.isRemix;
+    let qs = queryString.stringify(queryParams);
+    if (qs) qs = `?${qs}`;
+
     const opts = {
-        body: vmState,
+        body: JSON.stringify(body),
         // If we set json:true then the body is double-stringified, so don't
         headers: {
             'Content-Type': 'application/json',
@@ -25,14 +44,7 @@ export default function (projectId, vmState, params) {
         },
         withCredentials: true
     };
-    const creatingProject = projectId === null || typeof projectId === 'undefined';
-    const queryParams = {};
-    if (params.hasOwnProperty('originalId')) queryParams.original_id = params.originalId;
-    if (params.hasOwnProperty('isCopy')) queryParams.is_copy = params.isCopy;
-    if (params.hasOwnProperty('isRemix')) queryParams.is_remix = params.isRemix;
-    if (params.hasOwnProperty('title')) queryParams.title = params.title;
-    let qs = queryString.stringify(queryParams);
-    if (qs) qs = `?${qs}`;
+
     if (creatingProject) {
         Object.assign(opts, {
             method: 'post',
@@ -48,18 +60,22 @@ export default function (projectId, vmState, params) {
         xhr(opts, (err, response) => {
             if (err) return reject(err);
             if (response.statusCode !== 200) return reject(response.statusCode);
-            let body;
             try {
                 // Since we didn't set json: true, we have to parse manually
-                body = JSON.parse(response.body);
+                let game = JSON.parse(response.body);
+
+                // Convert game mae to scratch project title
+                // This happens here as a layer for conversion of things
+                if(game.name) {
+                    game.title = game.name
+                    // no more name after here. Scratch uses title
+                    delete game["name"]
+                }
+                resolve(game);
             } catch (e) {
                 return reject(e);
             }
-            body.id = projectId;
-            if (creatingProject) {
-                body.id = body['content-name'];
-            }
-            resolve(body);
+
         });
     });
 }
