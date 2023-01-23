@@ -155,7 +155,7 @@ class Deck extends React.Component {
         const promise = new Promise((resolve, reject) => {
           xhr({
               method: 'GET',
-              uri: `${decksHost}/decks?project_id=${projectId}`,
+              uri: `${decksHost}/decks?game_id=${projectId}`,
               headers: {
                 "Content-Type": 'application/json',
                 'Authorization': `Bearer ${projectToken}`
@@ -513,7 +513,7 @@ class Deck extends React.Component {
                 },
                 body: JSON.stringify({
                   "deck": {
-                    "project_id": projectId
+                    "game_id": projectId
                   }
                 })
             }, (error, response) => {
