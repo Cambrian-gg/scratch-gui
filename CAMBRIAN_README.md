@@ -17,26 +17,26 @@ The token is issued as an API token from the platform. When starting the Platfor
 ```jsx
 // src/playground/render-gui.jsx
    <WrappedGui
-        canEditTitle
-        backpackVisible
-        showComingSoon
-        backpackHost={backpackHost}
-        canSave={true}
-        canCreateNew={true}
-        projectToken={urlParams.token}
-        // projectHost={"http://localhost:3030/scratch/projects"}
-        projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
-        // decksHost={"http://localhost:3030/scratch"}
-        decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
-        // assetHost={"http://localhost:3030/scratch/assets"}
-        // assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
-        onClickLogo={onClickLogo}
-    />
+       canEditTitle
+       backpackVisible
+       showComingSoon
+       backpackHost={backpackHost}
+       canSave={true}
+       canCreateNew={true}
+       projectToken={urlParams.token}
+       projectHost={projectHost || "http://localhost:3030/scratch/projects"}
+       decksHost={deckHost || "http://localhost:3030/scratch"}
+       assetHost={assetHost || "http://localhost:3030/scratch/assets"}
+       // projectHost={"https://cambrian-gg.herokuapp.com/scratch/projects"}
+       // decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
+       // assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
+       onClickLogo={onClickLogo}
 ```
 
 Then do
 
 ```bash
+nvm use v16.17.1
 npm start
 ```
 
@@ -69,3 +69,14 @@ c-0.1.1
 c-0.1.0
 ```
 
+## Common errors
+
+### NetworkError: Failed to execute 'importScripts' on 'WorkerGlobalScope':
+
+```
+NetworkError: Failed to execute 'importScripts' on 'WorkerGlobalScope': The script at 'https://cambrian.axlessoft.com/cambrianDecks' failed to load.
+```
+
+This occurs when
+
+1. The cambrian extensions cannot be loaded. The repos for scratch-vm and scratch-gui should be linked. Check https://github.com/LLK/scratch-gui/wiki/Getting-Started
