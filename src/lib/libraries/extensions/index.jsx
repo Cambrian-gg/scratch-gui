@@ -63,7 +63,7 @@ export default [
         internetConnectionRequired: true,
         connectionIconURL: ev3ConnectionIconURL,
         connectionSmallIconURL: ev3ConnectionSmallIconURL,
-        helpLink: 'https://cambrian-gg.herokuapp.com/extensions/'
+        helpLink: 'https://app.cambrian.gg/extensions/'
     },
     {
         name: (

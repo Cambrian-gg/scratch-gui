@@ -9,7 +9,7 @@ import HashParserHOC from '../lib/hash-parser-hoc.jsx';
 import log from '../lib/log.js';
 
 const onClickLogo = () => {
-    window.location = 'https://cambrian-gg.herokuapp.com';
+    window.location = 'https://app.cambrian.gg';
 };
 
 const handleTelemetryModalCancel = () => {
@@ -98,11 +98,11 @@ export default appTarget => {
                 // projectHost={projectHost || "http://localhost:3030/scratch/games"}
                 // decksHost={deckHost || "http://localhost:3030/scratch"}
                 // assetHost={assetHost || "http://localhost:3030/scratch/assets"}
-                projectHost={"https://cambrian-gg.herokuapp.com/scratch/games"}
-                decksHost={"https://cambrian-gg.herokuapp.com/scratch"}
-                assetHost={"https://cambrian-gg.herokuapp.com/scratch/assets"}
+                projectHost={"https://app.cambrian.gg/scratch/games"}
+                decksHost={"https://app.cambrian.gg/scratch"}
+                assetHost={"https://app.cambrian.gg/scratch/assets"}
                 onClickLogo={onClickLogo}
-                logo="https://cambrian-gg.herokuapp.com/assets/text-logo-dadaf9faac43fab06d46fadac4736e61b148d203fc656759f3dbf30a6aaabaaf.png"
+                logo="https://app.cambrian.gg/assets/text-logo-dadaf9faac43fab06d46fadac4736e61b148d203fc656759f3dbf30a6aaabaaf.png"
             />,
         appTarget);
 };
