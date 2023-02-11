@@ -57,11 +57,11 @@ function DeckComponent(props) {
                 </input>
                 { card.cardAiGenerations.some(cag => cag["completedAt"] == null) && <span>Autocompleting please wait...</span> }
                 {
-                  // Not the best way. I am not sure how much of information should we expose to the outside world
-                  // Should we get into the details of what failed - like a key, or request or something.
-                  // Should we make a distinction between "at capacity" and "an error occurred".
-                  // Until more requirements come I am just exposing the message
-                  card.cardAiGenerations.some(cag => cag["rawResponse"] && cag["rawResponse"]["code"] != "200") && <span>Could not get a result from AI. Probably it's busy...</span>
+                  // Here we directly print the error from the platform. No modification
+                  // The platform has prepared it for us
+                  // I HATE JSX. This way of doing things looks and feels awful.
+                  card.cardAiGenerations.find(cag => cag["rawResponse"] && cag["rawResponse"]["code"] != "200") != null
+                    && <span>{ card.cardAiGenerations.find(cag => cag["rawResponse"] && cag["rawResponse"]["code"] != "200")["rawResponse"]["message"] }</span>
                 }
               </div>
             </div>
