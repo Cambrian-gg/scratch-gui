@@ -60,8 +60,8 @@ function DeckComponent(props) {
                   // Here we directly print the error from the platform. No modification
                   // The platform has prepared it for us
                   // I HATE JSX. This way of doing things looks and feels awful.
-                  card.cardAiGenerations.find(cag => cag["rawResponse"] && cag["rawResponse"]["code"] != "200") != null
-                    && <span>{ card.cardAiGenerations.find(cag => cag["rawResponse"] && cag["rawResponse"]["code"] != "200")["rawResponse"]["message"] }</span>
+                  card.cardAiGenerations.find(cag => cag["humanReadableError"] && cag["humanReadableError"]["code"] != "200") != null
+                    && <span>{ card.cardAiGenerations.find(cag => cag["humanReadableError"] && cag["humanReadableError"]["code"] != "200")["humanReadableError"]["message"] }</span>
                 }
               </div>
             </div>
