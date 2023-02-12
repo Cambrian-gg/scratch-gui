@@ -21,11 +21,20 @@ const appTarget = document.createElement('div');
 appTarget.className = styles.app;
 document.body.appendChild(appTarget);
 
-if (supportedBrowser()) {
+if (supportedBrowser() && window.innerWidth >= 1024) {
     // require needed here to avoid importing unsupported browser-crashing code
     // at the top level
     require('./render-gui.jsx').default(appTarget);
 
+} else if( supportedBrowser() && window.innerWidth < 1024) {
+  const html = `
+        <div>
+          <h1>Cambrian Code editor</h1>
+          <p>We need at least 1024px of visible screen.</p>
+          <p>Anything less than that makes it difficult to use the editor.</p>
+        </div>,
+    `
+  appTarget.append(new DOMParser().parseFromString(html, 'text/html').body.childNodes[0])
 } else {
     BrowserModalComponent.setAppElement(appTarget);
     const WrappedBrowserModalComponent = AppStateHOC(BrowserModalComponent, true /* localesOnly */);
