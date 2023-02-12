@@ -31,6 +31,7 @@ if (supportedBrowser() && window.innerWidth >= 1024) {
         <div>
           <h1>Cambrian Code editor</h1>
           <p>We need at least 1024px of visible screen.</p>
+          <p>Currently it is ${window.innerWidth}px.</p>
           <p>Anything less than that makes it difficult to use the editor.</p>
         </div>,
     `
