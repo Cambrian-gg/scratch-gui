@@ -28,11 +28,11 @@ if (supportedBrowser() && window.innerWidth >= 1024) {
 
 } else if( supportedBrowser() && window.innerWidth < 1024) {
   const html = `
-        <div>
-          <h1>Cambrian Code editor</h1>
-          <p>We need at least 1024px of visible screen.</p>
-          <p>Currently it is ${window.innerWidth}px.</p>
+        <div style="margin: 24px">
+          <h1 style="font-size: 24px">Cambrian Code editor</h1>
+          <p>We need at least <strong>1024px</strong> of visible screen.</p>
           <p>Anything less than that makes it difficult to use the editor.</p>
+          <p>Currently it is <strong>${window.innerWidth}px</strong>.</p>
         </div>,
     `
   appTarget.append(new DOMParser().parseFromString(html, 'text/html').body.childNodes[0])
