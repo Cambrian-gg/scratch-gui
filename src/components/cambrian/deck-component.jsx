@@ -70,8 +70,10 @@ function DeckComponent(props) {
           {
             categoryIds.map((categoryId) => {
               const categoryValue = card?.categoryValues?.filter((categoryValue) => categoryValue.cardId == card.id && categoryValue.categoryId == categoryId)[0];
+              const parsedValue = parseInt(categoryValue?.value,10);
+              const value = isNaN(parsedValue) ? "" : parsedValue;
               return <td key={`${categoryId}-${card.id}`}>
-                    <input value={categoryValue?.value || ""}
+                    <input value={value}
                       className="block mx-auto w-8/12 text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
                       id={`categoryValue-${categoryValue?.id}`}
                       data-category-id={categoryId}
