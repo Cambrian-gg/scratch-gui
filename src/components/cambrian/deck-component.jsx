@@ -6,6 +6,7 @@ function DeckComponent(props) {
     const {
       onCreateCard,
       onChangeCard,
+      onSelectCard,
       onUpdateCard,
       onDeleteCard,
       onChangeCategory,
@@ -16,8 +17,11 @@ function DeckComponent(props) {
       onCreateCardAiGeneration,
       onGenerateImagesChanged,
       isGenerateImagesSelected,
-      onAutocompleteAll,
+      onAutocompleteSelected,
+      onDeleteSelected,
+      onToggleSelectedForAll,
       deck,
+      selectedCardIds,
     } = props;
 
     if(deck) {
@@ -37,11 +41,17 @@ function DeckComponent(props) {
       );
       // TODO mkirilov this should not be here it does not follow the pattern.
       const categoryIds = deck.categories?.map(({ id }) => id);
-
       const cards = deck.cards?.map((card)=> (
         <tr key={card.id} id={"card-"+ card.id}>
           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
             <div className="flex items-center">
+            <input
+              type="checkbox"
+              class="mr-4 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              checked={selectedCardIds.includes(card.id)}
+              onChange={onSelectCard}
+              data-card-id={card.id}
+              />
               <div className="h-20 w-20 flex-shrink-0">
                 <img className="h-20 w-20 rounded-sm" src={card.imageUrl}></img>
               </div>
@@ -92,7 +102,12 @@ function DeckComponent(props) {
         )
       );
 
-
+      const selectedLabel = () => {
+        if (selectedCardIds.length == deck.cards.length || selectedCardIds.length == 0) {
+          return `${selectedCardIds.length}`;
+        }
+        return `${selectedCardIds.length}/${deck.cards.length}`
+      }
 
       return (
         <div className="px-2 py-4 w-full bg-white space-y-4 flex flex-col">
@@ -111,7 +126,7 @@ function DeckComponent(props) {
             </div>
           </div>
           <div>
-            <h2 className="h3">Card List</h2>
+            <h2 className="h3">Card List ({deck.cards.length})</h2>
 
             <label>
               <input type="checkbox"
@@ -121,8 +136,16 @@ function DeckComponent(props) {
                 /> Should generate images when autocompleting
             </label>
             <div className='pt-2 flex'>
-              <button onClick={onAutocompleteAll} className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Autocomplete all</button>
-              <button onClick={onCreateCard} className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Create Card</button>
+              <button onClick={onCreateCard} className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Create Card</button>
+
+              <button onClick={onToggleSelectedForAll} data-selected-value="true" className="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Select all</button>
+
+              <button onClick={onToggleSelectedForAll} data-selected-value="false" className="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Deselect all</button>
+
+              <button onClick={onAutocompleteSelected} className="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Autocomplete selected ({selectedLabel()})</button>
+
+              <button onClick={onDeleteSelected} className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Delete selected ({selectedLabel()})</button>
+
               {
                 isLoading && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 animate-spin my-auto mx-2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />

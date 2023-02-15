@@ -10,6 +10,7 @@ import {
     setGenerateImages,
     unsetGenerateImages,
     setShouldGenerateImagesWasSet,
+    setSelectedCardIds,
 } from '../../reducers/cambrian/decks';
 
 import {costumeUpload} from '../../lib/file-uploader.js';
@@ -23,6 +24,7 @@ class Deck extends React.Component {
               'handleCreateCard',
               'handleDeleteCard',
               'handleChangeCard',
+              'handleSelectCard',
               'handleUpdateCard',
               'handleChangeCategory',
               'handleChangeCategoryValue',
@@ -30,7 +32,9 @@ class Deck extends React.Component {
               'handleUpdateDeck',
               'handleChangeDeck',
               'handleCreateCardAiGeneration',
-              'handleCreateCardAiGenerationForAll',
+              'handleCreateCardAiGenerationForSelected',
+              'handleDeleteForSelected',
+              'handleToggleSelectedForAll',
               'handleGenerateImagesChanged',
           ]);
           this.state = {}
@@ -304,12 +308,18 @@ class Deck extends React.Component {
 
     handleDeleteCard(event) {
         const cardId = event.target.value;
-        const deleteFromServerPromise = this.deleteCardFromServer(cardId)
-        deleteFromServerPromise.then(() => {
-          this.deleteCardFromDeckComponent(cardId)
-        }).then(() => {
-          this.deleteCardFromCostumes(cardId);
-        })
+        this.deleteCard(cardId);
+    }
+
+    deleteCard(cardId){
+      const deleteFromServerPromise = this.deleteCardFromServer(cardId);
+      deleteFromServerPromise.then(() => {
+        this.deleteCardFromDeckComponent(cardId)
+      }).then(() => {
+        this.deleteCardFromCostumes(cardId);
+      }).then(() => {
+        this.props.onsetSelectedCardIds([+cardId], false)
+      })
     }
 
     deleteCardFromServer(cardId) {
@@ -375,6 +385,15 @@ class Deck extends React.Component {
           deck: deck
         })
     }
+
+    handleSelectCard(event) {
+      const cardId = event.target.dataset.cardId;
+      if (this.props.selectedCardIds.includes(+cardId)){
+        this.props.onsetSelectedCardIds([+cardId], false);
+      } else {
+        this.props.onsetSelectedCardIds([+cardId], true);
+      }
+  }
 
     handleUpdateCard(event) {
         const cardId = event.target.dataset.cardId;
@@ -487,8 +506,21 @@ class Deck extends React.Component {
         });
     }
 
-    handleCreateCardAiGenerationForAll(event) {
-        return this.state.deck.cards.map(card=> this.createCardAiGeneration(card.id))
+    handleCreateCardAiGenerationForSelected() {
+      this.props.selectedCardIds.forEach(cardId => this.createCardAiGeneration(cardId));
+    }
+
+    handleDeleteForSelected() {
+      this.props.selectedCardIds.forEach(cardId  => this.deleteCard(cardId));
+    }
+
+    handleToggleSelectedForAll(event) {
+      const allCardIds = this.state.deck.cards.map(card => card.id);
+      if (event.target.dataset.selectedValue == 'true'){
+        this.props.onsetSelectedCardIds(allCardIds, true)
+      } else {
+        this.props.onsetSelectedCardIds(allCardIds, false)
+      }
     }
 
     handleCreateDeck() {
@@ -627,6 +659,7 @@ class Deck extends React.Component {
                 deck={this.state.deck}
                 onCreateCard={this.handleCreateCard}
                 onChangeCard={this.handleChangeCard}
+                onSelectCard={this.handleSelectCard}
                 onDeleteCard={this.handleDeleteCard}
                 onUpdateCard={this.handleUpdateCard}
                 onChangeCategory={this.handleChangeCategory}
@@ -637,8 +670,11 @@ class Deck extends React.Component {
                 onCreateCardAiGeneration={this.handleCreateCardAiGeneration}
                 isGenerateImagesSelected={this.props.shouldGenerateImages}
                 onGenerateImagesChanged={this.handleGenerateImagesChanged}
-                onAutocompleteAll={this.handleCreateCardAiGenerationForAll}
+                onAutocompleteSelected={this.handleCreateCardAiGenerationForSelected}
+                onDeleteSelected={this.handleDeleteForSelected}
+                onToggleSelectedForAll={this.handleToggleSelectedForAll}
                 isLoading={this.state.isLoading}
+                selectedCardIds={this.props.selectedCardIds}
               />
         )
 
@@ -651,20 +687,23 @@ Deck.propTypes = {
   projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   shouldGenerateImages: PropTypes.bool,
   shouldGenerateImagesWasSet: PropTypes.bool,
+  selectedCardIds: PropTypes.arrayOf(PropTypes.number),
   vm: PropTypes.instanceOf(VM)
 };
 
 const mapStateToProps = (state, ownProps) => {
   return {
     shouldGenerateImages: state.scratchGui.decks.shouldGenerateImages,
-    shouldGenerateImagesWasSet: state.scratchGui.decks.shouldGenerateImagesWasSet
+    shouldGenerateImagesWasSet: state.scratchGui.decks.shouldGenerateImagesWasSet,
+    selectedCardIds: state.scratchGui.decks.selectedCardIds
   };
 };
 
 const mapDispatchToProps = dispatch => ({
   onSetGenerateImages: () => dispatch(setGenerateImages()),
   onUnsetGenerateImages: () => dispatch(unsetGenerateImages()),
-  onSetShouldGeneratedImagesWasSet: () => dispatch(setShouldGenerateImagesWasSet())
+  onSetShouldGeneratedImagesWasSet: () => dispatch(setShouldGenerateImagesWasSet()),
+  onsetSelectedCardIds: (cardId, value) => dispatch(setSelectedCardIds(cardId, value)),
 });
 
 export default errorBoundaryHOC('Deck')(
