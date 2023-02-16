@@ -161,7 +161,7 @@ function DeckComponent(props) {
                   <tr>
                     <th scope="col" className="">Name</th>
                     { categories }
-                    <th scope="col" className="">Costume</th>
+                    <th scope="col" className="">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
