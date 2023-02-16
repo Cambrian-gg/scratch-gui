@@ -39,6 +39,7 @@ const CambrianHOC = function (WrappedComponent) {
     }
     CambrianComponent.propTypes = {
         projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        decksHost: PropTypes.string,
         vm: PropTypes.instanceOf(VM)
     };
     const mapStateToProps = state => {
