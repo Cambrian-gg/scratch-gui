@@ -62,7 +62,8 @@ const ConnectedPlayer = connect(
 // ability to compose reducers.
 const WrappedPlayer = compose(
     AppStateHOC,
-    HashParserHOC
+    HashParserHOC,
+    CambrianHOC
 )(ConnectedPlayer);
 
 const appTarget = document.createElement('div');
