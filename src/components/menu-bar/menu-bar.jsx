@@ -13,7 +13,7 @@ import Box from '../box/box.jsx';
 import Button from '../button/button.jsx';
 import CommunityButton from './community-button.jsx';
 import ShareButton from './share-button.jsx';
-import ForkButton from './fork-button.jsx';
+import CambrianRemixButton from './cambrian-remix-button.jsx';
 import {ComingSoonTooltip} from '../coming-soon/coming-soon.jsx';
 import Divider from '../divider/divider.jsx';
 import LanguageSelector from '../../containers/language-selector.jsx';
@@ -401,9 +401,9 @@ class MenuBar extends React.Component {
                             />
                         </div>
                         <div className={classNames(styles.menuBarItem)}>
-                          <ForkButton
+                          <CambrianRemixButton
                               className={styles.menuBarButton}
-                              isForked={this.props.isForked}
+                              isCambrianRemixed={this.props.isCambrianRemixed}
                           />
                         </div>
 

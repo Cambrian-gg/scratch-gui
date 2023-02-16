@@ -7,7 +7,7 @@ import Button from '../button/button.jsx';
 import styles from './share-button.css';
 import {connect} from 'react-redux';
 
-class ForkButton extends React.Component {
+class CambrianRemix extends React.Component {
 
     constructor(props) {
         super(props);
@@ -16,7 +16,7 @@ class ForkButton extends React.Component {
     render() {
       const {
           className,
-          isForked,
+          isCambrianRemixed,
           onClick,
           projectId,
           projectHost
@@ -27,7 +27,7 @@ class ForkButton extends React.Component {
               className={classNames(
                   className,
                   styles.shareButton,
-                  {[styles.shareButtonIsShared]: isForked}
+                  {[styles.shareButtonIsShared]: isCambrianRemixed}
               )}
               onClick={()=> {
                 // FIXME: This value should come from the redux state
@@ -37,17 +37,17 @@ class ForkButton extends React.Component {
                 window.location.href=`${projectHost}/games/${projectId}`
               }}
           >
-              {isForked ? (
+              {isCambrianRemixed ? (
                   <FormattedMessage
-                      defaultMessage="Fork"
-                      description="Label for forked project"
-                      id="gui.menuBar.isForked"
+                      defaultMessage="Remix"
+                      description="Label for cambrian remix project"
+                      id="gui.menuBar.isCambrianRemixed"
                   />
               ) : (
                   <FormattedMessage
-                      defaultMessage="Fork"
-                      description="Label for project fork button"
-                      id="gui.menuBar.fork"
+                      defaultMessage="Remix"
+                      description="Label for project cambrian remix button"
+                      id="gui.menuBar.cambrianRemixß"
                   />
               )}
           </Button>
@@ -55,9 +55,9 @@ class ForkButton extends React.Component {
     }
 };
 
-ForkButton.propTypes = {
+CambrianRemix.propTypes = {
     className: PropTypes.string,
-    isForked: PropTypes.bool,
+    isCambrianRemixed: PropTypes.bool,
     onClick: PropTypes.func,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
@@ -68,4 +68,4 @@ const mapStateToProps = state => ({
 
 export default connect(
     mapStateToProps,
-)(ForkButton);
+)(CambrianRemix);
