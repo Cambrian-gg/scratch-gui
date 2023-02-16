@@ -21,19 +21,50 @@ const appTarget = document.createElement('div');
 appTarget.className = styles.app;
 document.body.appendChild(appTarget);
 
-if (supportedBrowser() && window.innerWidth >= 1024) {
+// I hate JS.
+// There is not an easy way to parse an url, change something in it
+// and them construct it again. The main issue is around encoding.
+// When the values are simple then JS API methods work. But when they are not
+// then...
+const urlParams = new URLSearchParams(window.location.search);
+const discardSmallSize = urlParams.get('discard-small-size') == 'true';
+let urlWithDiscard = window.location.href.split("#")[0]
+urlWithDiscard=urlWithDiscard.split("&").map((x)=> {
+    if(x.indexOf("discard-small-size")==0) {
+      return "discard-small-size=true"
+    } else {
+      return x;
+    }
+  }).join("&")
+
+if(urlWithDiscard.indexOf("discard-small-size")==-1) {
+  urlWithDiscard+="&discard-small-size=true"
+}
+
+const projectId = window.location.href.split("#")[1]
+if(projectId) {
+  urlWithDiscard += `#${projectId}`
+}
+
+if (supportedBrowser() && (window.innerWidth >= 1024 || discardSmallSize)) {
     // require needed here to avoid importing unsupported browser-crashing code
     // at the top level
     require('./render-gui.jsx').default(appTarget);
 
-} else if( supportedBrowser() && window.innerWidth < 1024) {
+} else if( supportedBrowser() && window.innerWidth < 1024 && !discardSmallSize) {
   const html = `
         <div style="margin: 24px">
-          <h1 style="font-size: 24px">Cambrian Code editor</h1>
-          <p>We need at least <strong>1024px</strong> of visible screen.</p>
-          <p>Anything less than that makes it difficult to use the editor.</p>
-          <p>Currently it is <strong>${window.innerWidth}px</strong>.</p>
-        </div>,
+          <div>
+            <h1 style="font-size: 24px">Cambrian Code editor</h1>
+            <p>We need at least <strong>1024px</strong> of visible screen width.</p>
+            <p>Anything less than that makes it difficult to use the editor.</p>
+            <p>Current visible screen width is <strong>${window.innerWidth}px</strong>.</p>
+
+          </div>
+          <div style="padding-top: 24px">
+            <a href="${urlWithDiscard}" style="color: blue">Proceed</a> (if you have a big heart and a lot of patience)
+          </div>
+        </div>
     `
   appTarget.append(new DOMParser().parseFromString(html, 'text/html').body.childNodes[0])
 } else {
