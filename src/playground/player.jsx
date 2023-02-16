@@ -27,6 +27,13 @@ const Player = ({isPlayerOnly, onSeeInside, projectId}) => (
             enableCommunity
             isPlayerOnly={isPlayerOnly}
             projectId={projectId}
+            // TODO: Extract the project, asset and deck hosts to a component
+            // projectHost={"http://localhost:3030/scratch/games"}
+            // decksHost={"http://localhost:3030/scratch"}
+            // assetHost={"http://localhost:3030/scratch/assets"}
+            projectHost={"https://app.cambrian.gg/scratch/games"}
+            decksHost={"https://app.cambrian.gg/scratch"}
+            assetHost={"https://app.cambrian.gg/scratch/assets"}
         />
     </Box>
 );
