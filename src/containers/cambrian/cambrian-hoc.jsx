@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import VM from 'scratch-vm';
+import {setFullScreen as setFullScreenReducerFunction } from '../../reducers/mode';
 
 /* Higher Order Component to create the Cambrian object in the VM
  * We need this to communicate the projectId and deckHost between the editor and
@@ -27,6 +28,10 @@ const CambrianHOC = function (WrappedComponent) {
               projectId: this.props.projectId,
               decksHost: this.props.decksHost
             }
+
+            if (this.props.isPlayerOnly && !this.props.isFullScreen){
+                this.props.setFullScreen(true)
+            }
         }
 
         render () {
@@ -45,10 +50,14 @@ const CambrianHOC = function (WrappedComponent) {
     const mapStateToProps = state => {
         return {
             projectId: state.scratchGui.projectState.projectId,
-            vm: state.scratchGui.vm
+            vm: state.scratchGui.vm,
+            isFullScreen: state.scratchGui.mode.isFullScreen,
+            isPlayerOnly: state.scratchGui.mode.isPlayerOnly,
         };
     };
-    const mapDispatchToProps = dispatch => ({});
+    const mapDispatchToProps = dispatch => ({
+        setFullScreen: (value) => { dispatch(setFullScreenReducerFunction(value))}
+    });
 
     return connect(
         mapStateToProps,
