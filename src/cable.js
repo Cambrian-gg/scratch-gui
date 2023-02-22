@@ -1,5 +1,9 @@
 import { createConsumer } from '@rails/actioncable';
-// const URL = 'ws://localhost:3030/cable';
+
+const searchParams = new URLSearchParams(window.location.href);
+const cableHost = searchParams.get('cable_host');
+
+// const URL = cableHost || 'ws://localhost:3030/cable';
 const URL = 'wss://app.cambrian.gg/cable'
 const consumer = createConsumer(URL);
 

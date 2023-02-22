@@ -41,18 +41,15 @@ export default appTarget => {
         CambrianHOC
     )(GUI);
 
-    // TODO a hack for testing the backpack, allow backpack host to be set by url param
-    const backpackHostMatches = window.location.href.match(/[?&]backpack_host=([^&]*)&?/);
-    const backpackHost = backpackHostMatches ? backpackHostMatches[1] : null;
-
-    const projectHostMatches = window.location.href.match(/[?&]game_host=([^&]*)&?/)
-    const projectHost = projectHostMatches ? projectHostMatches[1] : null;
-
-    const deckHostMatchers = window.location.href.match(/[?&]deck_host=([^&]*)&?/)
-    const deckHost = deckHostMatchers ? deckHostMatchers[1] : null;
-
-    const assetHostMatchers = window.location.href.match(/[?&]assetHost=([^&]*)&?/)
-    const assetHost = assetHostMatchers ? assetHostMatchers[1] : null;
+    const searchParams = new URLSearchParams(window.location.href);
+    const backpackHost = searchParams.get('backpack_host');
+    const projectHost = searchParams.get('game_host');
+    const deckHost = searchParams.get('deck_host');
+    const splitAssetHost = searchParams.get('asset_host')?.split("#");
+    let assetHost;
+    if (splitAssetHost){
+        assetHost = splitAssetHost[0];
+    }
 
     const scratchDesktopMatches = window.location.href.match(/[?&]isScratchDesktop=([^&]+)/);
     let simulateScratchDesktop;
