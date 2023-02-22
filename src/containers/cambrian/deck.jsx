@@ -11,6 +11,7 @@ import {
     unsetGenerateImages,
     setShouldGenerateImagesWasSet,
     setSelectedCardIds,
+    toggleEditOnCategoryIds,
 } from '../../reducers/cambrian/decks';
 
 import {costumeUpload} from '../../lib/file-uploader.js';
@@ -27,6 +28,7 @@ class Deck extends React.Component {
               'handleSelectCard',
               'handleUpdateCard',
               'handleChangeCategory',
+              'handleUpdateCategory',
               'handleChangeCategoryValue',
               'handleCreateDeck',
               'handleUpdateDeck',
@@ -35,6 +37,7 @@ class Deck extends React.Component {
               'handleCreateCardAiGenerationForSelected',
               'handleDeleteForSelected',
               'handleToggleSelectedForAll',
+              'handleToggleEditOnCategory',
               'handleGenerateImagesChanged',
           ]);
           this.state = {}
@@ -523,6 +526,19 @@ class Deck extends React.Component {
       }
     }
 
+    handleToggleEditOnCategory(event) {
+      const categoryId = event.currentTarget.dataset.categoryId;
+      this.props.onToggleEditOnCategoryIds([categoryId]);
+    }
+
+    handleUpdateCategory(event) {
+      const categoryId = event.currentTarget.dataset.categoryId;
+
+      this.updateDeckOnServer().then(() => {
+        this.props.onToggleEditOnCategoryIds([categoryId]);
+      });
+    }
+
     handleCreateDeck() {
         const {
           decksHost,
@@ -663,6 +679,7 @@ class Deck extends React.Component {
                 onDeleteCard={this.handleDeleteCard}
                 onUpdateCard={this.handleUpdateCard}
                 onChangeCategory={this.handleChangeCategory}
+                onUpdateCategory={this.handleUpdateCategory}
                 OnChangeCategoryValue={this.handleChangeCategoryValue}
                 onCreateDeck={this.handleCreateDeck}
                 onUpdateDeck={this.handleUpdateDeck}
@@ -673,8 +690,10 @@ class Deck extends React.Component {
                 onAutocompleteSelected={this.handleCreateCardAiGenerationForSelected}
                 onDeleteSelected={this.handleDeleteForSelected}
                 onToggleSelectedForAll={this.handleToggleSelectedForAll}
+                onToggleEditOnCategory={this.handleToggleEditOnCategory}
                 isLoading={this.state.isLoading}
                 selectedCardIds={this.props.selectedCardIds}
+                editableCategoryIds={this.props.editableCategoryIds}
               />
         )
 
@@ -695,7 +714,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     shouldGenerateImages: state.scratchGui.decks.shouldGenerateImages,
     shouldGenerateImagesWasSet: state.scratchGui.decks.shouldGenerateImagesWasSet,
-    selectedCardIds: state.scratchGui.decks.selectedCardIds
+    selectedCardIds: state.scratchGui.decks.selectedCardIds,
+    editableCategoryIds: state.scratchGui.decks.editableCategoryIds
   };
 };
 
@@ -703,7 +723,8 @@ const mapDispatchToProps = dispatch => ({
   onSetGenerateImages: () => dispatch(setGenerateImages()),
   onUnsetGenerateImages: () => dispatch(unsetGenerateImages()),
   onSetShouldGeneratedImagesWasSet: () => dispatch(setShouldGenerateImagesWasSet()),
-  onsetSelectedCardIds: (cardId, value) => dispatch(setSelectedCardIds(cardId, value)),
+  onsetSelectedCardIds: (cardIds, value) => dispatch(setSelectedCardIds(cardIds, value)),
+  onToggleEditOnCategoryIds: (categoryIds) => dispatch(toggleEditOnCategoryIds(categoryIds)),
 });
 
 export default errorBoundaryHOC('Deck')(

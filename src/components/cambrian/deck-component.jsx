@@ -10,6 +10,7 @@ function DeckComponent(props) {
       onUpdateCard,
       onDeleteCard,
       onChangeCategory,
+      onUpdateCategory,
       OnChangeCategoryValue,
       onCreateDeck,
       onUpdateDeck,
@@ -20,25 +21,70 @@ function DeckComponent(props) {
       onAutocompleteSelected,
       onDeleteSelected,
       onToggleSelectedForAll,
+      onToggleEditOnCategory,
       deck,
       selectedCardIds,
+      editableCategoryIds,
     } = props;
 
     if(deck) {
       const isLoading = props.isLoading || deck.cards.some( card => card.cardAiGenerations.some(cag=> cag["completedAt"] == null));
 
+
+      const categoryEdit = (category) => {
+
+        const categoryEditOnKeyUp = (event) => {
+          if (event.key == "Escape"){
+            // TODO: Need to add a way to discard saving the edit..
+          }
+
+          if (event.key == "Enter") {
+            // I do not like this, because it is coupling with the implementation of the other event, but I do not know
+            // If I want to add another function only for this..
+            onUpdateCategory({currentTarget: {dataset: {categoryId: category.id}}});
+          }
+        }
+        return <>
+          <input
+            className="block w-32 mx-auto text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
+            onChange={onChangeCategory}
+            onKeyUp={categoryEditOnKeyUp}
+            data-category-id={category.id}
+            value={category.name}>
+          </input>
+          <svg
+            onClick={onUpdateCategory}
+            data-category-id={category.id}
+            className="text-green-500 w-5 h-5 ml-1"
+            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+          </svg>
+        </>
+      }
+
+      const categoryShow = (category) => {
+        return <>
+          {category.name}
+          <svg
+            onClick={onToggleEditOnCategory}
+            data-category-id={category.id}
+            className="w-5 h-5 ml-1"
+            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+              <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+          </svg>
+        </>
+      }
+
       const categories = deck.categories?.map((category) => (
           <th key={category.id} scope="col" className="px-2">
-            <input
-              className="block w-32 mx-auto text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
-              onChange={onChangeCategory}
-              onBlur={onUpdateDeck}
-              data-category-id={category.id}
-              value={category.name}>
-            </input>
+            <div class="flex justify-center">
+              { editableCategoryIds[category.id] ? categoryEdit(category) : categoryShow(category) }
+            </div>
           </th>
         )
       );
+
       // TODO mkirilov this should not be here it does not follow the pattern.
       const categoryIds = deck.categories?.map(({ id }) => id);
       const cards = deck.cards?.map((card)=> (
