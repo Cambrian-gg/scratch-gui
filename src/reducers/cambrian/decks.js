@@ -2,7 +2,6 @@ const SET_GENERATE_IMAGES = 'scratch-gui/cambrian/decks/SET_GENERATE_IMAGES';
 const UNSET_GENERATE_IMAGES = 'scratch-gui/cambrian/decks/UNSET_GENERATE_IMAGES';
 const SET_SHOULD_GENERATE_IMAGES_WAS_SET = 'scratch-gui/cambrian/decks/SET_SHOULD_GENERATE_IMAGES_WAS_SET';
 const SET_SELECTED_CARD_IDS = 'scratch-gui/cambrian/decks/SET_SELECTED_CARD_IDS';
-const TOGGLE_EDIT_ON_CATEGORY_ID = 'scratch-gui/cambrian/decks/TOGGLE_EDIT_ON_CATEGORY_ID';
 
 const initialState = {
     shouldGenerateImages: false,
@@ -44,17 +43,6 @@ const reducer = function (state, action) {
             selectedCardIds: selectedCardIds.filter(onlyUnique)
         });
 
-    case TOGGLE_EDIT_ON_CATEGORY_ID:
-        const editableCategoryIds = { ...state.editableCategoryIds };
-        action.categoryIds.forEach(categoryId => {
-            editableCategoryIds[categoryId] = !editableCategoryIds[categoryId];
-        });
-
-
-        return Object.assign({}, state, {
-            editableCategoryIds: editableCategoryIds
-        });
-
     default:
         return state;
     }
@@ -77,11 +65,6 @@ const setSelectedCardIds = (cardIds, value) => ({
     value: value
 })
 
-const toggleEditOnCategoryIds = (categoryIds) => ({
-    type: TOGGLE_EDIT_ON_CATEGORY_ID,
-    categoryIds: categoryIds
-})
-
 export {
     reducer as default,
     initialState as decksInitialState,
@@ -89,5 +72,4 @@ export {
     unsetGenerateImages,
     setShouldGenerateImagesWasSet,
     setSelectedCardIds,
-    toggleEditOnCategoryIds,
 };
