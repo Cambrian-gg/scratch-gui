@@ -1,3 +1,4 @@
+
 # scratch-gui
 #### Scratch GUI is a set of React components that comprise the interface for creating and running Scratch 3.0 projects
 
@@ -257,3 +258,68 @@ Here's what will happen in the project state machine:
 
 ## Donate
 We provide [Scratch](https://scratch.mit.edu) free of charge, and want to keep it that way! Please consider making a [donation](https://www.scratchfoundation.org/donate) to support our continued engineering, design, community, and resource development efforts. Donations of any size are appreciated. Thank you!
+
+
+## Cambrian Development
+
+### Enable project_host and asset_host params in the url
+
+1. Edit src/playground/render-gui.jsx to be
+
+```
+--- a/src/playground/render-gui.jsx
++++ b/src/playground/render-gui.jsx
+@@ -94,12 +94,12 @@ export default appTarget => {
+                 canSave={true}
+                 canCreateNew={true}
+                 projectToken={urlParams.token}
+-                // projectHost={projectHost || "http://localhost:3030/scratch/games"}
+-                // decksHost={deckHost || "http://localhost:3030/scratch"}
+-                // assetHost={assetHost || "http://localhost:3030/scratch/assets"}
+-                projectHost={"https://app.cambrian.gg/scratch/games"}
+-                decksHost={"https://app.cambrian.gg/scratch"}
+-                assetHost={"https://app.cambrian.gg/scratch/assets"}
++                projectHost={projectHost || "http://localhost:3030/scratch/games"}
++                decksHost={deckHost || "http://localhost:3030/scratch"}
++                assetHost={assetHost || "http://localhost:3030/scratch/assets"}
++                // projectHost={"https://app.cambrian.gg/scratch/games"}
++                // decksHost={"https://app.cambrian.gg/scratch"}
++                // assetHost={"https://app.cambrian.gg/scratch/assets"}
+```
+
+2. Edit src/playground/player.jsx to be
+```
+--- a/src/playground/player.jsx
++++ b/src/playground/player.jsx
+@@ -72,10 +72,10 @@ document.body.appendChild(appTarget);
+ ReactDOM.render(<WrappedPlayer
+                   isPlayerOnly
+                   // TODO: Extract the project, asset and deck hosts to a component
+-                  // projectHost={"http://localhost:3030/scratch/games"}
+-                  // decksHost={"http://localhost:3030/scratch"}
+-                  // assetHost={"http://localhost:3030/scratch/assets"}
+-                  projectHost={"https://app.cambrian.gg/scratch/games"}
+-                  decksHost={"https://app.cambrian.gg/scratch"}
+-                  assetHost={"https://app.cambrian.gg/scratch/assets"}
++                  projectHost={"http://localhost:3030/scratch/games"}
++                  decksHost={"http://localhost:3030/scratch"}
++                  assetHost={"http://localhost:3030/scratch/assets"}
++                  // projectHost={"https://app.cambrian.gg/scratch/games"}
++                  // decksHost={"https://app.cambrian.gg/scratch"}
++                  // assetHost={"https://app.cambrian.gg/scratch/assets"}
+```
+
+3. Edit src/cable.js to be
+
+```
+--- a/src/cable.js
++++ b/src/cable.js
+@@ -3,8 +3,8 @@ import { createConsumer } from '@rails/actioncable';
+ const searchParams = new URLSearchParams(window.location.href);
+ const cableHost = searchParams.get('cable_host');
+
+-// const URL = cableHost || 'ws://localhost:3030/cable';
+-const URL = 'wss://app.cambrian.gg/cable'
++const URL = cableHost || 'ws://localhost:3030/cable';
++// const URL = 'wss://app.cambrian.gg/cable'
+```
