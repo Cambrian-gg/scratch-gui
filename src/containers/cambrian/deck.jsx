@@ -13,7 +13,7 @@ import {
     setSelectedCardIds,
 } from '../../reducers/cambrian/decks';
 
-import {costumeUpload} from '../../lib/file-uploader.js';
+import { createCardInCostumes } from "../../lib/cambrian/costumes-utilities.js";
 import VM from 'scratch-vm';
 import consumer from "../../cable.js"
 
@@ -99,56 +99,6 @@ class Deck extends React.Component {
             return this.reorderCostumeBasedOnCards();
         })
     }
-    emptyCostumes() {
-        const deck = this.state.deck;
-        if(deck) {
-            deck.cards.forEach((card)=> {
-              this.deleteCardFromCostumes(card.id);
-            })
-            // along with deleting all the costumes for cards that are existing
-            // we delete the costumes for cards that are not existing
-            // We need this because of when a project is forked. When it is
-            // there are costumes with card-'id' where there is not card with this id
-            // as the card was duplicated
-            const {
-              vm
-            } = this.props;
-
-            const costumes = vm.editingTarget.getCostumes().filter(costume => costume.name.startsWith(`card-`))
-            costumes.forEach(costume => {
-              const index = vm.editingTarget.getCostumes().indexOf(costume)
-              vm.editingTarget.deleteCostume(index);
-            })
-
-            return deck;
-        }
-    }
-
-    recreateCostumesFromCards() {
-        const deck = this.state.deck;
-        if(deck) {
-            const allCreatePromises = deck.cards.map((card)=> {
-              return this.createCardInCostumes(card)
-            })
-            return Promise.all(allCreatePromises)
-        }
-    }
-
-    reorderCostumeBasedOnCards() {
-        const {
-          vm
-        } = this.props;
-        // now we reorder them as the creates were in a promise
-        const deck = this.state.deck;
-        if(deck) {
-            for(let i = 0; i < deck.cards.length; i++) {
-              const card = deck.cards[i]
-              const currentCostumeIndex = vm.editingTarget.getCostumes().findIndex(c=> c.name.startsWith(`card-${card.id}-`))
-              const newCostumeIndex = i;
-              vm.editingTarget.reorderCostume(currentCostumeIndex, i)
-            }
-        }
-    }
 
     loadDeckFromServer() {
         const {
@@ -196,11 +146,62 @@ class Deck extends React.Component {
         return Promise.all([promise])
     }
 
+    emptyCostumes() {
+        const deck = this.state.deck;
+        if(deck) {
+            deck.cards.forEach((card)=> {
+              this.deleteCardFromCostumes(card.id);
+            })
+            // along with deleting all the costumes for cards that are existing
+            // we delete the costumes for cards that are not existing
+            // We need this because of when a project is forked. When it is
+            // there are costumes with card-'id' where there is not card with this id
+            // as the card was duplicated
+            const {
+              vm
+            } = this.props;
+
+            const costumes = vm.editingTarget.getCostumes().filter(costume => costume.name.startsWith(`card-`))
+            costumes.forEach(costume => {
+              const index = vm.editingTarget.getCostumes().indexOf(costume)
+              vm.editingTarget.deleteCostume(index);
+            })
+
+            return deck;
+        }
+    }
+
+    recreateCostumesFromCards() {
+        const deck = this.state.deck;
+        if(deck) {
+            const allCreatePromises = deck.cards.map((card)=> {
+              return createCardInCostumes(card, this)
+            })
+            return Promise.all(allCreatePromises)
+        }
+    }
+
+    reorderCostumeBasedOnCards() {
+        const {
+          vm
+        } = this.props;
+        // now we reorder them as the creates were in a promise
+        const deck = this.state.deck;
+        if(deck) {
+            for(let i = 0; i < deck.cards.length; i++) {
+              const card = deck.cards[i]
+              const currentCostumeIndex = vm.editingTarget.getCostumes().findIndex(c=> c.name.startsWith(`card-${card.id}-`))
+              const newCostumeIndex = i;
+              vm.editingTarget.reorderCostume(currentCostumeIndex, i)
+            }
+        }
+    }
+
     handleCreateCard (name) {
         this.createCardOnServer(name).then((newCard)=> {
           return this.createCardInDeckComponent(newCard)
         }).then((newCard) => {
-          return this.createCardInCostumes(newCard)
+          return createCardInCostumes(newCard, this)
         })
     }
 
@@ -258,52 +259,6 @@ class Deck extends React.Component {
             )
             resolve(newCard);
         });
-    }
-
-    /**
-     * Creates a costume based on the card.
-     *
-     * @return a promise that will resovle when the card is create. Resolve with the costume as param
-     */
-    createCardInCostumes(card) {
-        const url = `${card.imageUrl}?time=${Date.now()}`;
-        const storage = this.props.vm.runtime.storage;
-        const vm = this.props.vm;
-        // We need to return a promise to resolve after adding the costume
-        // Otherwise we don't know when this addition will happen
-        // We want the whole method to resolve then.
-        return new Promise((resolve, reject)=> {
-            fetch(url)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('Network response was not OK');
-                }
-                return response.blob();
-              }).then((blob) => {
-                return new Promise((resolveFileReader, reject) => {
-                    const fileReader = new FileReader();
-                    fileReader.onload = () => resolveFileReader(fileReader.result);
-                    fileReader.readAsDataURL(blob);
-                });
-              }).then((data)=> {
-                  costumeUpload(data,"image/png", storage, vmCostumes => {
-                      vmCostumes.forEach((costume, i) => {
-                          costume.name = `card-${card.id}-${card.name}`;
-                      });
-                      this.addCostume(vmCostumes, false, null).then(() => {
-                          const costume = vmCostumes[0];
-                          const index = this.props.vm.editingTarget.getCostumes().indexOf(costume)
-                          const newIndex = this.state.deck.cards.indexOf(card)
-                          vm.editingTarget.reorderCostume(index, newIndex)
-                          resolve(costume)
-                      });
-                  },()=>{
-                    console.log("here")
-                  })
-              }).catch((error) => {
-                console.error('There has been a problem with your fetch operation:', error);
-              });
-        })
     }
 
     handleDeleteCard(event) {
