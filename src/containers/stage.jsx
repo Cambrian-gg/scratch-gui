@@ -6,6 +6,9 @@ import VM from 'scratch-vm';
 import {connect} from 'react-redux';
 
 import {STAGE_DISPLAY_SIZES} from '../lib/layout-constants';
+import {
+    getIsShowingProject
+} from '../reducers/project-state';
 import {getEventXY} from '../lib/touch-utils';
 import VideoProvider from '../lib/video/video-provider';
 import {BitmapAdapter as V2BitmapAdapter} from 'scratch-svg-renderer';
@@ -83,13 +86,28 @@ class Stage extends React.Component {
             this.props.isFullScreen !== nextProps.isFullScreen ||
             this.state.question !== nextState.question ||
             this.props.micIndicator !== nextProps.micIndicator ||
-            this.props.isStarted !== nextProps.isStarted;
+            this.props.isStarted !== nextProps.isStarted ||
+            this.props.isShowingProject !== nextProps.isShowingProject;
     }
     componentDidUpdate (prevProps) {
         if (this.props.isColorPicking && !prevProps.isColorPicking) {
             this.startColorPickingLoop();
         } else if (!this.props.isColorPicking && prevProps.isColorPicking) {
             this.stopColorPickingLoop();
+        }
+        if (this.props.isShowingProject && !prevProps.isShowingProject) {
+            // FIXME: THIS IS A VERY UGLY HACK
+            // What we do here is the following. The DeckToConstumesHOC is loading
+            // the deck cards into costumes.
+            // But the Stage is called before that. There is no way for the Stage
+            // to know that the DeckToCostumesHOC has completed work. We need
+            // to introduce a reducer for this and this is just too much at the moment.
+            // I have to think about it.
+            // But for now we just refresh three seconds after that. At least one of the images
+            // will be loaded in the costumes.
+            setTimeout(()=> {
+              this.props.vm.renderer.draw()
+            },3000)
         }
         this.updateRect();
         this.renderer.resize(this.rect.width, this.rect.height);
@@ -434,6 +452,7 @@ Stage.propTypes = {
     onDeactivateColorPicker: PropTypes.func,
     stageSize: PropTypes.oneOf(Object.keys(STAGE_DISPLAY_SIZES)).isRequired,
     useEditorDragStyle: PropTypes.bool,
+    isShowingProject: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
@@ -445,6 +464,7 @@ const mapStateToProps = state => ({
     isColorPicking: state.scratchGui.colorPicker.active,
     isFullScreen: state.scratchGui.mode.isFullScreen,
     isStarted: state.scratchGui.vmStatus.started,
+    isShowingProject: getIsShowingProject(state.scratchGui.projectState.loadingState),
     micIndicator: state.scratchGui.micIndicator,
     // Do not use editor drag style in fullscreen or player mode.
     useEditorDragStyle: !(state.scratchGui.mode.isFullScreen || state.scratchGui.mode.isPlayerOnly)
