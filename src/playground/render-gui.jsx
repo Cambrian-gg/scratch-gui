@@ -4,6 +4,7 @@ import {compose} from 'redux';
 
 import AppStateHOC from '../lib/app-state-hoc.jsx';
 import CambrianHOC from "../containers/cambrian/cambrian-hoc.jsx"
+import DeckToCostumesHOC from "../containers/cambrian/deck-to-costumes-hoc.jsx"
 import GUI from '../containers/gui.jsx';
 import HashParserHOC from '../lib/hash-parser-hoc.jsx';
 import log from '../lib/log.js';
@@ -38,7 +39,8 @@ export default appTarget => {
     const WrappedGui = compose(
         AppStateHOC,
         HashParserHOC,
-        CambrianHOC
+        CambrianHOC,
+        DeckToCostumesHOC,
     )(GUI);
 
     const searchParams = new URLSearchParams(window.location.href);
