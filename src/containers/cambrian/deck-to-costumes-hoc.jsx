@@ -191,6 +191,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
     DeckToCostumesComponent.propTypes = {
         projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         decksHost: PropTypes.string,
+        isShowingProject: PropTypes.bool,
         vm: PropTypes.instanceOf(VM)
     };
 
@@ -198,7 +199,6 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         return {
             projectId: state.scratchGui.projectState.projectId,
             vm: state.scratchGui.vm,
-            isShowingProject: state.scratchGui.mode.isShowingProject,
         };
     };
 
