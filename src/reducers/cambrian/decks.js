@@ -2,11 +2,13 @@ const SET_GENERATE_IMAGES = 'scratch-gui/cambrian/decks/SET_GENERATE_IMAGES';
 const UNSET_GENERATE_IMAGES = 'scratch-gui/cambrian/decks/UNSET_GENERATE_IMAGES';
 const SET_SHOULD_GENERATE_IMAGES_WAS_SET = 'scratch-gui/cambrian/decks/SET_SHOULD_GENERATE_IMAGES_WAS_SET';
 const SET_SELECTED_CARD_IDS = 'scratch-gui/cambrian/decks/SET_SELECTED_CARD_IDS';
+const SET_DECK_SYNCED_WITH_COSTUMES = 'scratch-gui/cambrian/decks/SET_DECK_SYNCED_WITH_COSTUMES';
 
 const initialState = {
     shouldGenerateImages: false,
     selectedCardIds: [],
     editableCategoryIds: {},
+    deckSyncedWithCostumes: false
 };
 
 const reducer = function (state, action) {
@@ -24,7 +26,6 @@ const reducer = function (state, action) {
         return Object.assign({}, state, {
             shouldGenerateImagesWasSet: true
         })
-
     case SET_SELECTED_CARD_IDS:
         let selectedCardIds = []
 
@@ -42,6 +43,11 @@ const reducer = function (state, action) {
         return Object.assign({}, state, {
             selectedCardIds: selectedCardIds.filter(onlyUnique)
         });
+
+    case SET_DECK_SYNCED_WITH_COSTUMES:
+        return Object.assign({}, state, {
+            deckSyncedWithCostumes: action.value
+        })
 
     default:
         return state;
@@ -65,6 +71,16 @@ const setSelectedCardIds = (cardIds, value) => ({
     value: value
 })
 
+/**
+ * Mark if the deck and the costumes are synced. Information goes from deck to costumes
+ * After they are in sync probably there is no need to sync them again. This is an easy solution
+ * until there is more requirement for a smarted sync of costumes with decks
+ */
+const setDeckSyncedWithCostumes = (value) => ({
+    type: SET_DECK_SYNCED_WITH_COSTUMES,
+    value: value
+})
+
 export {
     reducer as default,
     initialState as decksInitialState,
@@ -72,4 +88,5 @@ export {
     unsetGenerateImages,
     setShouldGenerateImagesWasSet,
     setSelectedCardIds,
+    setDeckSyncedWithCostumes
 };

@@ -5,10 +5,13 @@ import { connect } from 'react-redux';
 import { costumeUpload } from '../../lib/file-uploader.js';
 import VM from 'scratch-vm';
 import { createCardInCostumes } from "../../lib/cambrian/costumes-utilities.js";
+import { setDeckSyncedWithCostumes } from "../../reducers/cambrian/decks.js";
+
+import { autoUpdateProject } from '../../reducers/project-state';
 
 /* Higher Order Component to sync the costumes with the deck. It should
  * take all the cards from the deck and put then as costumens.
- * This is needed both when editing and when playing
+ * This is needed both when editing and when playing.
  *
  * It provides some of the methods as utitilies for others to use
  *
@@ -23,8 +26,31 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         }
 
         componentDidUpdate (prevProps) {
-            if (this.props.isShowingProject && !prevProps.isShowingProject) {
-                this.syncDeckToCostumes()
+            // What is this logic doing?
+            //
+            // When we open a game we must sync the deck with the costumes
+            // But this means that we change the costumes and suddenly the project is not saved
+            // right after opening it. If we try to exit there will be a warning that the
+            // project is not save.
+            // So we save the project after syncing the deck. But this triggers the sync again
+            // because we are reloading the component.
+            // The logic below makes sure we sync once, then save and after the save we don't
+            // sync.
+            const hasProjectChanged = this.props.projectChanged && !prevProps.projectChanged;
+            if (hasProjectChanged) {
+              // project was changed. Does not matter how for now
+              // The deck might not be synced with the costumes.
+              this.props.onUnsyncDeckWithCostumes();
+            }
+            const hasShowedProject = this.props.isShowingProject && !prevProps.isShowingProject
+            if (!this.props.deckSyncedWithCostumes && hasShowedProject) {
+                // We wait for the project to be showed.
+                this.syncDeckToCostumes();
+            }
+
+            const wasProjectSave = !this.props.projectChanged && prevProps.projectChanged
+            if (wasProjectSave) {
+                // Left empty. I think I will need it in the future and it is useful for debug
             }
         }
 
@@ -58,11 +84,14 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             // to avoid indexOf issues that occur when reordering the cards
             // in the createCardInCostumes
             this.loadDeckFromServer().then(()=> {
-                return this.emptyCostumes()
+                return this.emptyAllCardCostumes()
             }).then(()=> {
                 return this.recreateCostumesFromCards();
             }).then(()=> {
                 return this.reorderCostumeBasedOnCards();
+            }).then(()=> {
+              this.props.onSyncDeckWithCostumes();
+              this.props.onAutoUpdateProject();
             })
         }
 
@@ -112,7 +141,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             return Promise.all([promise])
         }
 
-        emptyCostumes() {
+        emptyAllCardCostumes() {
             const deck = this.state.deck;
             const scope = this;
             if(deck) {
@@ -192,18 +221,28 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         decksHost: PropTypes.string,
         isShowingProject: PropTypes.bool,
-        vm: PropTypes.instanceOf(VM)
+        vm: PropTypes.instanceOf(VM),
+        projectChanged: PropTypes.bool,
     };
 
     const mapStateToProps = state => {
         return {
             projectId: state.scratchGui.projectState.projectId,
             vm: state.scratchGui.vm,
+            deckSyncedWithCostumes: state.scratchGui.decks.deckSyncedWithCostumes,
+            projectChanged: state.scratchGui.projectChanged
         };
     };
 
+    const mapDispatchToProps = dispatch => ({
+        onAutoUpdateProject: () => dispatch(autoUpdateProject()),
+        onSyncDeckWithCostumes: () => dispatch(setDeckSyncedWithCostumes(true)),
+        onUnsyncDeckWithCostumes: () => dispatch(setDeckSyncedWithCostumes(false))
+    });
+
     return connect(
         mapStateToProps,
+        mapDispatchToProps
     )(DeckToCostumesComponent);
 }
 
