@@ -11,6 +11,8 @@ import {
     unsetGenerateImages,
     setShouldGenerateImagesWasSet,
     setSelectedCardIds,
+    setDeckSyncedWithCostumes,
+    setDeck
 } from '../../reducers/cambrian/decks';
 
 import { createCardInCostumes } from "../../lib/cambrian/costumes-utilities.js";
@@ -23,11 +25,10 @@ class Deck extends React.Component {
           bindAll(this, [
               'handleCreateCard',
               'handleDeleteCard',
-              'handleChangeCard',
               'handleSelectCard',
-              'handleUpdateCard',
-              'handleChangeCategory',
-              'handleChangeCategoryValue',
+              'handleUpdateCardName',
+              'handleUpdateCategory',
+              'handleUpdateCardCategoryValue',
               'handleCreateDeck',
               'handleUpdateDeck',
               'handleChangeDeck',
@@ -47,8 +48,6 @@ class Deck extends React.Component {
           this.props.onSetShouldGeneratedImagesWasSet()
         }
 
-        this.refreshDeck()
-
         consumer.subscriptions.create({
             channel: 'DecksChannel',
             username: 'kmitov@axlessoft.com',
@@ -57,7 +56,9 @@ class Deck extends React.Component {
             disconnected: () => console.log('disconnected'),
             received: data => {
               console.log("receive event for deck. Updating")
-              this.refreshDeck();
+              // FIXME. This should not refresh the whole deck. Only part of it
+              // For the moment we are refreshing the whole deck
+            this.props.setDeckSyncedWithCostumes(false);
             }
         })
     }
@@ -69,133 +70,6 @@ class Deck extends React.Component {
     componentWillUnmount() {
         consumer.disconnect()
     };
-
-    refreshDeck() {
-        const {
-          vm
-        } = this.props;
-        // Brute force sync them all. We sync names, pictures
-        // and position. We will upload them all back to the server
-        // and make post request. But doing it smarter requires a
-        // much smarter API of what changed with the card, when and
-        // how, in order to chagne only what changed.
-        // One of the things is the url of the pictures. This url
-        // contains a signature and this signature is different
-        // each time so we can not such compare the url of the image
-        // and decide if we should change the image.
-        //
-        // It will take about a day to figure how to do it in smart way here
-
-        // this.createCardInCostumes(card);
-        //
-        // We first delete all the costumes and then crete the new ones
-        // to avoid indexOf issues that occur when reordering the cards
-        // in the createCardInCostumes
-        this.loadDeckFromServer().then(()=> {
-            return this.emptyCostumes()
-        }).then(()=> {
-            return this.recreateCostumesFromCards();
-        }).then(()=> {
-            return this.reorderCostumeBasedOnCards();
-        })
-    }
-
-    loadDeckFromServer() {
-        const {
-          decksHost,
-          projectToken,
-          projectId
-        } = this.props;
-        const promise = new Promise((resolve, reject) => {
-          xhr({
-              method: 'GET',
-              uri: `${decksHost}/decks?game_id=${projectId}`,
-              headers: {
-                "Content-Type": 'application/json',
-                'Authorization': `Bearer ${projectToken}`
-              },
-              json: true
-          }, (error, response) => {
-
-              if (error || response.statusCode !== 200) {
-                  this.setState(
-                      {
-                          ...this.state,
-                          deck: undefined
-                      }
-                  )
-                  return reject(new Error(response.status));
-              }
-              const lastDeck = response.body[response.body.length-1]
-              if(lastDeck) {
-                const deck =  {
-                          cards: [],
-                          ...lastDeck
-                        }
-                this.setState(
-                    {
-                        ...this.state,
-                        deck: deck
-
-                    }
-                ) // take the first one as we know only how to handle the first one.
-                resolve(deck)
-              }
-          })
-        })
-        return Promise.all([promise])
-    }
-
-    emptyCostumes() {
-        const deck = this.state.deck;
-        if(deck) {
-            deck.cards.forEach((card)=> {
-              this.deleteCardFromCostumes(card.id);
-            })
-            // along with deleting all the costumes for cards that are existing
-            // we delete the costumes for cards that are not existing
-            // We need this because of when a project is forked. When it is
-            // there are costumes with card-'id' where there is not card with this id
-            // as the card was duplicated
-            const {
-              vm
-            } = this.props;
-
-            const costumes = vm.editingTarget.getCostumes().filter(costume => costume.name.startsWith(`card-`))
-            costumes.forEach(costume => {
-              const index = vm.editingTarget.getCostumes().indexOf(costume)
-              vm.editingTarget.deleteCostume(index);
-            })
-
-            return deck;
-        }
-    }
-
-    recreateCostumesFromCards() {
-        const deck = this.state.deck;
-        if(deck) {
-            const allCreatePromises = deck.cards.map((card)=> {
-              return createCardInCostumes(card, this)
-            })
-            return Promise.all(allCreatePromises)
-        }
-    }
-
-    reorderCostumeBasedOnCards() {
-        const {
-          vm
-        } = this.props;
-        // now we reorder them as the creates were in a promise
-        const deck = this.state.deck;
-        if(deck) {
-            for(let i = 0; i < deck.cards.length; i++) {
-              const card = deck.cards[i]
-              const currentCostumeIndex = vm.editingTarget.getCostumes().findIndex(c=> c.name.startsWith(`card-${card.id}-`))
-              const newCostumeIndex = i;
-              vm.editingTarget.reorderCostume(currentCostumeIndex, i)
-            }
-        }
-    }
 
     handleCreateCard (name) {
         this.createCardOnServer(name).then((newCard)=> {
@@ -216,7 +90,7 @@ class Deck extends React.Component {
           projectToken
         } = this.props;
 
-        const deckId = this.state.deck.id;
+        const deckId = this.props.deck.id;
         this.setState({...this.state, isLoading: true});
 
         const promise = new Promise((resolve, reject) => {
@@ -248,13 +122,10 @@ class Deck extends React.Component {
 
     createCardInDeckComponent(newCard) {
         return new Promise((resolve, reject)=>{
-            const deck = this.state.deck;
-            this.setState(
-                {
-                    deck: {
-                      ...deck,
-                      cards: [...deck.cards, newCard]
-                    }
+            const deck = this.props.deck;
+            this.props.setDeck({
+                  ...deck,
+                  cards: [...deck.cards, newCard]
                 }
             )
             resolve(newCard);
@@ -314,31 +185,18 @@ class Deck extends React.Component {
     }
 
     deleteCardFromDeckComponent(cardId) {
-        const newCards = this.state.deck.cards.filter(card=> {
+        const newCards = this.props.deck.cards.filter(card=> {
           return card.id != cardId
         })
 
-        const deck = this.state.deck;
+        const deck = this.props.deck;
 
-        this.setState(
+        this.props.setDeck(
             {
-                deck: {
-                  ...deck,
-                  cards: newCards
-                }
+                ...deck,
+                cards: newCards
             }
         )
-    }
-
-    handleChangeCard(event) {
-        const cardId = event.target.dataset.cardId;
-        const deck = this.state.deck;
-        const card = this.getCardWithId(cardId)
-        card.name = event.target.value
-        this.setState({
-          ...this.state,
-          deck: deck
-        })
     }
 
     handleSelectCard(event) {
@@ -350,9 +208,16 @@ class Deck extends React.Component {
       }
   }
 
-    handleUpdateCard(event) {
+    handleUpdateCardName(event) {
+        const deck = this.props.deck
         const cardId = event.target.dataset.cardId;
-        const card = this.getCardWithId(cardId)
+        const card = deck.cards.filter((card)=> {
+            return card.id == cardId;
+        })[0]
+
+        card.name = event.target.value;
+        this.props.setDeck(deck);
+
         // don't update a specific card. Update the whole deck on the server
         this.updateDeckOnServer().then(()=> {
           // This update happens only if we change categories or names
@@ -377,28 +242,21 @@ class Deck extends React.Component {
         }
     }
 
-    getCardWithId(cardId) {
-        return this.state.deck.cards.filter((card)=> {
-            return card.id == cardId
-        })[0]
-    }
-
-    handleChangeCategory(event) {
+    handleUpdateCategory(event) {
       const categoryId = event.target.dataset.categoryId;
-      const deck = this.state.deck;
+      const deck = this.props.deck;
       const category = deck.categories.filter(({ id}) => id == categoryId )[0];
       category.name = event.target.value;
-      this.setState({
-        ...this.state,
-        deck: deck
-      })
+      this.props.setDeck(deck);
+      this.updateDeckOnServer();
     }
 
-    handleChangeCategoryValue(event) {
+    handleUpdateCardCategoryValue(event) {
+      console.log("handleUpdateCardCategoryValue")
       const cardId = event.target.dataset.cardId;
       const categoryId = event.target.dataset.categoryId;
 
-      const deck = this.state.deck;
+      const deck = this.props.deck;
       const card = deck.cards.filter(({ id }) => id == cardId)[0];
 
       const categoryValue = card.categoryValues.filter((categoryValue) => categoryValue.cardId == cardId && categoryValue.categoryId == categoryId)[0];
@@ -408,10 +266,8 @@ class Deck extends React.Component {
         card.categoryValues.push({value: event.target.value, categoryId: categoryId, cardId: cardId})
       }
 
-      this.setState({
-        ...this.state,
-        deck: deck
-      })
+      this.props.setDeck(deck);
+      this.updateDeckOnServer();
     }
 
     handleCreateCardAiGeneration(event) {
@@ -447,12 +303,12 @@ class Deck extends React.Component {
                     return reject(new Error(response.status));
                 }
                 const card = response.body
-                const deck = this.state.deck;
+                const deck = this.props.deck;
                 const index = deck.cards.findIndex(c=> c.id == card.id)
                 deck.cards[index] = card
+                this.props.setDeck(deck);
                 this.setState({
                   ...this.state,
-                  deck: deck,
                   isLoading: false,
                 })
 
@@ -470,7 +326,7 @@ class Deck extends React.Component {
     }
 
     handleToggleSelectedForAll(event) {
-      const allCardIds = this.state.deck.cards.map(card => card.id);
+      const allCardIds = this.props.deck.cards.map(card => card.id);
       if (event.target.dataset.selectedValue == 'true'){
         this.props.onsetSelectedCardIds(allCardIds, true)
       } else {
@@ -508,12 +364,11 @@ class Deck extends React.Component {
                     return reject(new Error(response.status));
                 }
                 const deck = JSON.parse(response.body)
-                this.setState({
-                  deck: {
-                    cards: [],
-                    ...deck
-                  }
-                })
+                deck = {
+                  cards: [],
+                  ...deck
+                }
+                this.props.setDeck(deck)
             });
         });
         Promise.all([promise])
@@ -521,12 +376,9 @@ class Deck extends React.Component {
 
     handleChangeDeck(event) {
       const deckName = event.target.value;
-      this.setState({
-        ...this.state,
-        deck: {
-          ...this.state.deck,
+      this.props.setDeck({
+          ...this.props.deck,
           name: deckName
-        }
       })
     }
 
@@ -535,7 +387,7 @@ class Deck extends React.Component {
     }
 
     updateDeckOnServer() {
-        const deck = Object.assign({}, this.state.deck);
+        const deck = Object.assign({}, this.props.deck);
         const {
           decksHost,
           projectToken
@@ -557,7 +409,7 @@ class Deck extends React.Component {
         });
 
         this.setState({...this.state, isLoading: true});
-
+        this.props.setDeck(deck)
         const promise = new Promise((resolve, reject) => {
             xhr({
                 method: 'PUT',
@@ -582,7 +434,8 @@ class Deck extends React.Component {
                 // because we are not providing the ID. Have two category_values for the same card/category is not permitted, because it makes no sense.
                 // This is the most Rails way I could think of. If we have problems with this update, we can implement on the Back End a way to distinguish
                 // creating from updating category_values without providing category_value.id, but it will not follow the accept_nested_attribute rules.
-                this.setState({...this.state, deck: JSON.parse(response.body), isLoading: false})
+                this.props.setDeck(JSON.parse(response.body))
+                this.setState({...this.state, isLoading: false})
                 return resolve(response.body, decksHost);
             });
         });
@@ -611,14 +464,13 @@ class Deck extends React.Component {
     render () {
         return (
             <DeckComponent
-                deck={this.state.deck}
+                deck={this.props.deck}
                 onCreateCard={this.handleCreateCard}
-                onChangeCard={this.handleChangeCard}
+                onUpdateCardName={this.handleUpdateCardName}
                 onSelectCard={this.handleSelectCard}
                 onDeleteCard={this.handleDeleteCard}
-                onUpdateCard={this.handleUpdateCard}
-                onChangeCategory={this.handleChangeCategory}
-                OnChangeCategoryValue={this.handleChangeCategoryValue}
+                onUpdateCategory={this.handleUpdateCategory}
+                onUpdateCardCategoryValue={this.handleUpdateCardCategoryValue}
                 onCreateDeck={this.handleCreateDeck}
                 onUpdateDeck={this.handleUpdateDeck}
                 onChangeDeck={this.handleChangeDeck}
@@ -643,7 +495,9 @@ Deck.propTypes = {
   shouldGenerateImages: PropTypes.bool,
   shouldGenerateImagesWasSet: PropTypes.bool,
   selectedCardIds: PropTypes.arrayOf(PropTypes.number),
-  vm: PropTypes.instanceOf(VM)
+  vm: PropTypes.instanceOf(VM),
+  deckSyncedWithCostumes: PropTypes.bool,
+  deck: PropTypes.any
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -651,6 +505,8 @@ const mapStateToProps = (state, ownProps) => {
     shouldGenerateImages: state.scratchGui.decks.shouldGenerateImages,
     shouldGenerateImagesWasSet: state.scratchGui.decks.shouldGenerateImagesWasSet,
     selectedCardIds: state.scratchGui.decks.selectedCardIds,
+    deckSyncedWithCostumes: state.scratchGui.decks.deckSyncedWithCostumes,
+    deck: state.scratchGui.decks.deck,
   };
 };
 
@@ -659,6 +515,8 @@ const mapDispatchToProps = dispatch => ({
   onUnsetGenerateImages: () => dispatch(unsetGenerateImages()),
   onSetShouldGeneratedImagesWasSet: () => dispatch(setShouldGenerateImagesWasSet()),
   onsetSelectedCardIds: (cardIds, value) => dispatch(setSelectedCardIds(cardIds, value)),
+  setDeckSyncedWithCostumes: (value) => dispatch(setDeckSyncedWithCostumes(value)),
+  setDeck: deck => dispatch(setDeck(deck)),
 });
 
 export default errorBoundaryHOC('Deck')(

@@ -5,9 +5,17 @@ import { connect } from 'react-redux';
 import { costumeUpload } from '../../lib/file-uploader.js';
 import VM from 'scratch-vm';
 import { createCardInCostumes } from "../../lib/cambrian/costumes-utilities.js";
-import { setDeckSyncedWithCostumes } from "../../reducers/cambrian/decks.js";
+import {
+  setDeckSyncedWithCostumes,
+  setDeck
+} from "../../reducers/cambrian/decks.js";
 
 import { autoUpdateProject } from '../../reducers/project-state';
+
+import {
+    activateTab,
+    AI_TAB_INDEX
+} from '../../reducers/editor-tab';
 
 /* Higher Order Component to sync the costumes with the deck. It should
  * take all the cards from the deck and put then as costumens.
@@ -22,7 +30,6 @@ const DeckToCostumesHOC = function (WrappedComponent) {
     class DeckToCostumesComponent extends React.Component {
         constructor(props) {
             super(props);
-            this.state = {}
         }
 
         componentDidUpdate (prevProps) {
@@ -45,6 +52,10 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             const hasShowedProject = this.props.isShowingProject && !prevProps.isShowingProject
             if (!this.props.deckSyncedWithCostumes && hasShowedProject) {
                 // We wait for the project to be showed.
+                this.syncDeckToCostumes();
+            } else if (this.props.deckSyncedWithCostumes == false && prevProps.deckSyncedWithCostumes == true) {
+                // another component set the deckSynchedWithCostumes to false probably after
+                // changing the deck. We must sync it now
                 this.syncDeckToCostumes();
             }
 
@@ -92,6 +103,11 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             }).then(()=> {
               this.props.onSyncDeckWithCostumes();
               this.props.onAutoUpdateProject();
+              // active the tab here. In this way we follow the scratch path of
+              // first activating the code tab. Not sure if this is needed,
+              // but at least in this way we are not changing the scratch logic
+              // and we are keeping the changes to a minimum
+              this.props.onActivateTab(AI_TAB_INDEX);
             })
         }
 
@@ -113,12 +129,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
               }, (error, response) => {
 
                   if (error || response.statusCode !== 200) {
-                      this.setState(
-                          {
-                              ...this.state,
-                              deck: undefined
-                          }
-                      )
+                      this.props.setDeck(undefined)
                       return reject(new Error(response.status));
                   }
                   const lastDeck = response.body[response.body.length-1]
@@ -127,13 +138,8 @@ const DeckToCostumesHOC = function (WrappedComponent) {
                               cards: [],
                               ...lastDeck
                             }
-                    this.setState(
-                        {
-                            ...this.state,
-                            deck: deck
-
-                        }
-                    ) // take the first one as we know only how to handle the first one.
+                    this.props.setDeck(deck)
+                    // take the first one as we know only how to handle the first one.
                     resolve(deck)
                   }
               })
@@ -142,7 +148,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         }
 
         emptyAllCardCostumes() {
-            const deck = this.state.deck;
+            const deck = this.props.deck;
             const scope = this;
             if(deck) {
                 deck.cards.forEach((card)=> {
@@ -168,7 +174,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         }
 
         recreateCostumesFromCards() {
-            const deck = this.state.deck;
+            const deck = this.props.deck;
             const scope = this;
             if(deck) {
                 const allCreatePromises = deck.cards.map((card)=> {
@@ -183,7 +189,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
               vm
             } = this.props;
             // now we reorder them as the creates were in a promise
-            const deck = this.state.deck;
+            const deck = this.props.deck;
             if(deck) {
                 for(let i = 0; i < deck.cards.length; i++) {
                   const card = deck.cards[i]
@@ -223,6 +229,9 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         isShowingProject: PropTypes.bool,
         vm: PropTypes.instanceOf(VM),
         projectChanged: PropTypes.bool,
+        onActivateTab: PropTypes.func,
+        // This one should be a 'shape of'
+        deck: PropTypes.any
     };
 
     const mapStateToProps = state => {
@@ -237,7 +246,9 @@ const DeckToCostumesHOC = function (WrappedComponent) {
     const mapDispatchToProps = dispatch => ({
         onAutoUpdateProject: () => dispatch(autoUpdateProject()),
         onSyncDeckWithCostumes: () => dispatch(setDeckSyncedWithCostumes(true)),
-        onUnsyncDeckWithCostumes: () => dispatch(setDeckSyncedWithCostumes(false))
+        onUnsyncDeckWithCostumes: () => dispatch(setDeckSyncedWithCostumes(false)),
+        onActivateTab: tab => dispatch(activateTab(tab)),
+        setDeck: deck => dispatch(setDeck(deck)),
     });
 
     return connect(

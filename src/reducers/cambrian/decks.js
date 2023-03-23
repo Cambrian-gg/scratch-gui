@@ -3,12 +3,14 @@ const UNSET_GENERATE_IMAGES = 'scratch-gui/cambrian/decks/UNSET_GENERATE_IMAGES'
 const SET_SHOULD_GENERATE_IMAGES_WAS_SET = 'scratch-gui/cambrian/decks/SET_SHOULD_GENERATE_IMAGES_WAS_SET';
 const SET_SELECTED_CARD_IDS = 'scratch-gui/cambrian/decks/SET_SELECTED_CARD_IDS';
 const SET_DECK_SYNCED_WITH_COSTUMES = 'scratch-gui/cambrian/decks/SET_DECK_SYNCED_WITH_COSTUMES';
+const SET_DECK = 'scratch-gui/cambrian/decks/SET_DECK';
 
 const initialState = {
     shouldGenerateImages: false,
     selectedCardIds: [],
     editableCategoryIds: {},
-    deckSyncedWithCostumes: false
+    deckSyncedWithCostumes: false,
+    deck: undefined
 };
 
 const reducer = function (state, action) {
@@ -49,6 +51,11 @@ const reducer = function (state, action) {
             deckSyncedWithCostumes: action.value
         })
 
+    case SET_DECK:
+        return Object.assign({}, state, {
+            deck: action.value
+        })
+
     default:
         return state;
     }
@@ -81,6 +88,11 @@ const setDeckSyncedWithCostumes = (value) => ({
     value: value
 })
 
+const setDeck = (deck) => ({
+    type: SET_DECK,
+    value: deck
+})
+
 export {
     reducer as default,
     initialState as decksInitialState,
@@ -88,5 +100,6 @@ export {
     unsetGenerateImages,
     setShouldGenerateImagesWasSet,
     setSelectedCardIds,
-    setDeckSyncedWithCostumes
+    setDeckSyncedWithCostumes,
+    setDeck,
 };

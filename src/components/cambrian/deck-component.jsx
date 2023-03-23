@@ -1,16 +1,19 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import CardCategoryInputComponent from '../../components/cambrian/card-category-input-component.jsx'
+import CategoryInputComponent from '../../components/cambrian/category-input-component.jsx'
+import CardNameInputComponent from '../../components/cambrian/card-name-input-component.jsx'
 
 function DeckComponent(props) {
 
     const {
+      deck,
       onCreateCard,
-      onChangeCard,
       onSelectCard,
-      onUpdateCard,
+      onUpdateCardName,
       onDeleteCard,
-      onChangeCategory,
-      OnChangeCategoryValue,
+      onUpdateCategory,
+      onUpdateCardCategoryValue,
       onCreateDeck,
       onUpdateDeck,
       onChangeDeck,
@@ -20,37 +23,24 @@ function DeckComponent(props) {
       onAutocompleteSelected,
       onDeleteSelected,
       onToggleSelectedForAll,
-      deck,
       selectedCardIds,
     } = props;
 
     if(deck) {
       const isLoading = props.isLoading || deck.cards.some( card => card.cardAiGenerations.some(cag=> cag["completedAt"] == null));
 
-
       const categoryEdit = (category) => {
-        return (
-          <div class="min-w-max mt-2 flex rounded-md shadow-sm">
-            <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-2 text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path>
-              </svg>
-            </span>
-            <input
-              class="text-center block w-32 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              onChange={onChangeCategory}
-              onBlur={onUpdateDeck}
-              data-category-id={category.id}
-              value={category.name} >
-            </input>
-          </div>
+        return (<CategoryInputComponent
+          onUpdateCategory={onUpdateCategory}
+          categoryId={category.id}
+          categoryName={category.name}
+          />
         );
       }
 
-
       const categories = deck.categories?.map((category) => (
           <th key={category.id} scope="col" className="px-2">
-            <div class="flex justify-center">
+            <div className="flex justify-center">
               { categoryEdit(category) }
             </div>
           </th>
@@ -58,6 +48,7 @@ function DeckComponent(props) {
       );
 
       // TODO mkirilov this should not be here it does not follow the pattern.
+      // TODO These should be extracted to components, probably
       const categoryIds = deck.categories?.map(({ id }) => id);
       const cards = deck.cards?.map((card)=> (
         <tr key={card.id} id={"card-"+ card.id}>
@@ -65,7 +56,7 @@ function DeckComponent(props) {
             <div className="flex items-center">
             <input
               type="checkbox"
-              class="mr-4 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              className="mr-4 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
               checked={selectedCardIds.includes(card.id)}
               onChange={onSelectCard}
               data-card-id={card.id}
@@ -74,15 +65,11 @@ function DeckComponent(props) {
                 <img className="h-20 w-20 rounded-sm" src={card.imageUrl}></img>
               </div>
               <div className="ml-4 w-full">
-                <input
-                  style={{ minWidth: "8rem" }}
-                  className="block mx-auto w-full pl-2 rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
-                  onChange={onChangeCard}
-                  onBlur={onUpdateCard}
-                  value={card.name}
-                  data-card-id={card.id}
-                  >
-                </input>
+                <CardNameInputComponent
+                  onUpdateCardName={onUpdateCardName}
+                  cardName={card.name}
+                  cardId={card.id}
+                />
                 { card.cardAiGenerations.some(cag => cag["completedAt"] == null) && <span>Autocompleting please wait...</span> }
                 {
                   // Here we directly print the error from the platform. No modification
@@ -98,18 +85,13 @@ function DeckComponent(props) {
           {
             categoryIds.map((categoryId) => {
               const categoryValue = card?.categoryValues?.filter((categoryValue) => categoryValue.cardId == card.id && categoryValue.categoryId == categoryId)[0];
-              const parsedValue = parseInt(categoryValue?.value,10);
-              const value = isNaN(parsedValue) ? "" : parsedValue;
-              return <td key={`${categoryId}-${card.id}`}>
-                    <input value={value}
-                      className="block mx-auto w-8/12 text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
-                      id={`categoryValue-${categoryValue?.id}`}
-                      data-category-id={categoryId}
-                      data-card-id={card.id}
-                      onChange={OnChangeCategoryValue}
-                      onBlur={onUpdateCard}>
-                    </input>
-                   </td>;
+              return (<CardCategoryInputComponent
+                key={`card-category-input-component-${card.id}-${categoryId}`}
+                cardId={card.id}
+                categoryId={categoryId}
+                categoryValue={categoryValue}
+                onUpdateCardCategoryValue={onUpdateCardCategoryValue}
+                />)
             })
           }
           <td className="text-center whitespace-nowrap px-2">
@@ -203,20 +185,24 @@ function DeckComponent(props) {
 }
 
 DeckComponent.propTypes = {
-    cards: PropTypes.arrayOf(PropTypes.object),
+    deck: PropTypes.any,
     onCreateCard: PropTypes.func,
+    onUpdateCardName: PropTypes.func,
+    onSelectCard: PropTypes.func,
     onDeleteCard: PropTypes.func,
-    onChangeCard: PropTypes.func,
-    onUpdateCard: PropTypes.func,
-    onChangeCategory: PropTypes.func,
-    OnChangeCategoryValue: PropTypes.func,
+    onUpdateCategory: PropTypes.func,
+    onUpdateCardCategoryValue: PropTypes.func,
     onCreateDeck: PropTypes.func,
     onUpdateDeck: PropTypes.func,
     onChangeDeck: PropTypes.func,
     onCreateCardAiGeneration: PropTypes.func,
     isGenerateImagesSelected: PropTypes.bool,
     onGenerateImagesChanged: PropTypes.func,
-    onAutocompleteAll: PropTypes.func,
+    onAutocompleteSelected: PropTypes.func,
+    onDeleteSelected: PropTypes.func,
+    onToggleSelectedForAll: PropTypes.func,
+    isLoading: PropTypes.bool,
+    selectedCardIds: PropTypes.arrayOf(PropTypes.number)
 };
 
 export default DeckComponent;
