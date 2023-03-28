@@ -20,6 +20,10 @@ const CambrianHOC = function (WrappedComponent) {
 
         componentDidMount () {
           // left empty to debug easier
+          const element = document.getElementById("cambrian-preload-message");
+          if(element) {
+            element.remove();
+          }
         }
 
         componentDidUpdate (prevProps) {
