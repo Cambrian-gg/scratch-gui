@@ -41,11 +41,11 @@ class CardCategoryInputComponent extends React.Component {
 
         const inputValue = this.state.inputValue;
 
-        const parsedValue = parseInt(inputValue,10);
-        const value = isNaN(parsedValue) ? "" : parsedValue;
+        // const parsedValue = parseFloat(parseFloat(inputValue).toFixed(2));
+        // const value = isNaN(parsedValue) ? "" : parsedValue;
         const id = `${categoryId}-${cardId}`
         return (<td key={id}>
-                  <input value={value}
+                  <input value={inputValue}
                     className="block mx-auto w-8/12 text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
                     id={id}
                     data-category-id={categoryId}
