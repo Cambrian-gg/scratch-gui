@@ -11,11 +11,16 @@ class CardCategoryInputComponent extends React.Component {
             ]
         )
         this.state = {}
-        this.state = { categoryValue: this.props.categoryValue }
+        this.state = { inputValue: this.props.inputValue }
     }
 
-    componentDidMount() {
-
+    componentDidUpdate(prevProps) {
+      if(this.props.inputValue != prevProps.inputValue) {
+        this.setState({
+            ...this.state,
+            inputValue: this.props.inputValue
+        });
+      }
     }
 
     handleChangeCardCategoryValue(event) {
@@ -23,10 +28,7 @@ class CardCategoryInputComponent extends React.Component {
       const value = event.target.value;
       this.setState({
           ...this.state,
-          categoryValue: {
-            ...this.state.categoryValue,
-            value: value
-          }
+          inputValue: value
       });
     }
 
@@ -37,14 +39,15 @@ class CardCategoryInputComponent extends React.Component {
           onUpdateCardCategoryValue
         } = this.props;
 
-        const categoryValue = this.state.categoryValue;
+        const inputValue = this.state.inputValue;
 
-        const parsedValue = parseInt(categoryValue?.value,10);
+        const parsedValue = parseInt(inputValue,10);
         const value = isNaN(parsedValue) ? "" : parsedValue;
-        return (<td key={`${categoryId}-${cardId}`}>
+        const id = `${categoryId}-${cardId}`
+        return (<td key={id}>
                   <input value={value}
                     className="block mx-auto w-8/12 text-center rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
-                    id={`categoryValue-${categoryValue?.id}`}
+                    id={id}
                     data-category-id={categoryId}
                     data-card-id={cardId}
                     onChange={this.handleChangeCardCategoryValue}
@@ -58,7 +61,7 @@ CardCategoryInputComponent.propTypes = {
     onUpdateCardCategoryValue: PropTypes.func,
     categoryId: PropTypes.number,
     cardId: PropTypes.number,
-    categoryValue: PropTypes.number
+    inputValue: PropTypes.number
 };
 
 export default CardCategoryInputComponent;

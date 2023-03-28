@@ -55,16 +55,16 @@ class Deck extends React.Component {
             connected: () => console.log('connected'),
             disconnected: () => console.log('disconnected'),
             received: data => {
-              console.log("receive event for deck. Updating")
+              console.log("Deck::receive event for deck. Setting deck synced to false")
               // FIXME. This should not refresh the whole deck. Only part of it
               // For the moment we are refreshing the whole deck
-            this.props.setDeckSyncedWithCostumes(false);
+              this.props.setDeckSyncedWithCostumes(false);
             }
         })
     }
 
     componentDidUpdate() {
-        console.log("componentDidUpdate")
+        console.log("Deck::componentDidUpdate")
     }
 
     componentWillUnmount() {

@@ -39,8 +39,7 @@ export default appTarget => {
     const WrappedGui = compose(
         AppStateHOC,
         HashParserHOC,
-        CambrianHOC,
-        DeckToCostumesHOC,
+        CambrianHOC
     )(GUI);
 
     const searchParams = new URLSearchParams(window.location.href);

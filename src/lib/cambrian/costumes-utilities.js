@@ -33,7 +33,7 @@ function createCardInCostumes(card, scope) {
                   scope.addCostume(vmCostumes, false, null).then(() => {
                       const costume = vmCostumes[0];
                       const index = scope.props.vm.editingTarget.getCostumes().indexOf(costume)
-                      const newIndex = scope.state.deck.cards.indexOf(card)
+                      const newIndex = scope.props.deck.cards.indexOf(card)
                       vm.editingTarget.reorderCostume(index, newIndex)
                       resolve(costume)
                   });

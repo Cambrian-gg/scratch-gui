@@ -32,7 +32,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             super(props);
         }
 
-        componentDidUpdate (prevProps) {
+        componentDidUpdate (prevProps, prevState) {
             // What is this logic doing?
             //
             // When we open a game we must sync the deck with the costumes
@@ -47,15 +47,16 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             if (hasProjectChanged) {
               // project was changed. Does not matter how for now
               // The deck might not be synced with the costumes.
+              // console.log("DeckToCostumesHOC::onUnsyncDeckWithCostumes")
               this.props.onUnsyncDeckWithCostumes();
             }
             const hasShowedProject = this.props.isShowingProject && !prevProps.isShowingProject
             if (!this.props.deckSyncedWithCostumes && hasShowedProject) {
+                // console.log("DeckToCostumesHOC:: !this.props.deckSyncedWithCostumes && hasShowedProject ")
                 // We wait for the project to be showed.
                 this.syncDeckToCostumes();
             } else if (this.props.deckSyncedWithCostumes == false && prevProps.deckSyncedWithCostumes == true) {
-                // another component set the deckSynchedWithCostumes to false probably after
-                // changing the deck. We must sync it now
+                // console.log("DeckToCostumesHOC:: this.props.deckSyncedWithCostumes == false && prevProps.deckSyncedWithCostumes == true")
                 this.syncDeckToCostumes();
             }
 
@@ -74,9 +75,11 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         }
 
         syncDeckToCostumes() {
+            // console.log("DeckToCostumesHOC::syncDeckToCostumes")
             const {
               vm
             } = this.props;
+
             // Brute force sync them all. We sync names, pictures
             // and position. We will upload them all back to the server
             // and make post request. But doing it smarter requires a
@@ -94,20 +97,15 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             // We first delete all the costumes and then crete the new ones
             // to avoid indexOf issues that occur when reordering the cards
             // in the createCardInCostumes
-            this.loadDeckFromServer().then(()=> {
+            return this.loadDeckFromServer().then(()=> {
                 return this.emptyAllCardCostumes()
             }).then(()=> {
                 return this.recreateCostumesFromCards();
             }).then(()=> {
-                return this.reorderCostumeBasedOnCards();
+                return this.reorderCostumesBasedOnCards();
             }).then(()=> {
               this.props.onSyncDeckWithCostumes();
               this.props.onAutoUpdateProject();
-              // active the tab here. In this way we follow the scratch path of
-              // first activating the code tab. Not sure if this is needed,
-              // but at least in this way we are not changing the scratch logic
-              // and we are keeping the changes to a minimum
-              this.props.onActivateTab(AI_TAB_INDEX);
             })
         }
 
@@ -148,6 +146,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         }
 
         emptyAllCardCostumes() {
+            // console.log("DeckToCostumesHOC::emptyAllCardCostumes")
             const deck = this.props.deck;
             const scope = this;
             if(deck) {
@@ -174,6 +173,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         }
 
         recreateCostumesFromCards() {
+            // console.log("DeckToCostumesHOC::recreateCostumesFromCards")
             const deck = this.props.deck;
             const scope = this;
             if(deck) {
@@ -184,7 +184,8 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             }
         }
 
-        reorderCostumeBasedOnCards() {
+        reorderCostumesBasedOnCards() {
+            // console.log("DeckToCostumesHOC::reorderCostumesBasedOnCards")
             const {
               vm
             } = this.props;
@@ -239,7 +240,8 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             projectId: state.scratchGui.projectState.projectId,
             vm: state.scratchGui.vm,
             deckSyncedWithCostumes: state.scratchGui.decks.deckSyncedWithCostumes,
-            projectChanged: state.scratchGui.projectChanged
+            projectChanged: state.scratchGui.projectChanged,
+            deck: state.scratchGui.decks.deck
         };
     };
 

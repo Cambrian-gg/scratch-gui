@@ -84,12 +84,14 @@ function DeckComponent(props) {
 
           {
             categoryIds.map((categoryId) => {
-              const categoryValue = card?.categoryValues?.filter((categoryValue) => categoryValue.cardId == card.id && categoryValue.categoryId == categoryId)[0];
+              const categoryValue = card?.categoryValues?.
+                filter((categoryValue) => categoryValue.cardId == card.id && categoryValue.categoryId == categoryId)[0];
+              const inputValue = categoryValue?.value
               return (<CardCategoryInputComponent
                 key={`card-category-input-component-${card.id}-${categoryId}`}
                 cardId={card.id}
                 categoryId={categoryId}
-                categoryValue={categoryValue}
+                inputValue={inputValue}
                 onUpdateCardCategoryValue={onUpdateCardCategoryValue}
                 />)
             })
