@@ -11,13 +11,11 @@ import {
     unsetGenerateImages,
     setShouldGenerateImagesWasSet,
     setSelectedCardIds,
-    setDeckSyncedWithCostumes,
     setDeck
 } from '../../reducers/cambrian/decks';
 
 import { createCardInCostumes } from "../../lib/cambrian/costumes-utilities.js";
 import VM from 'scratch-vm';
-import consumer from "../../cable.js"
 
 class Deck extends React.Component {
     constructor(props) {
@@ -47,29 +45,11 @@ class Deck extends React.Component {
           this.props.onSetGenerateImages()
           this.props.onSetShouldGeneratedImagesWasSet()
         }
-
-        consumer.subscriptions.create({
-            channel: 'DecksChannel',
-            username: 'kmitov@axlessoft.com',
-        }, {
-            connected: () => console.log('connected'),
-            disconnected: () => console.log('disconnected'),
-            received: data => {
-              console.log("Deck::receive event for deck. Setting deck synced to false")
-              // FIXME. This should not refresh the whole deck. Only part of it
-              // For the moment we are refreshing the whole deck
-              this.props.setDeckSyncedWithCostumes(false);
-            }
-        })
     }
 
     componentDidUpdate() {
         console.log("Deck::componentDidUpdate")
     }
-
-    componentWillUnmount() {
-        consumer.disconnect()
-    };
 
     handleCreateCard (name) {
         this.createCardOnServer(name).then((newCard)=> {
@@ -144,7 +124,7 @@ class Deck extends React.Component {
       }).then(() => {
         this.deleteCardFromCostumes(cardId);
       }).then(() => {
-        this.props.onsetSelectedCardIds([+cardId], false)
+        this.props.onSetSelectedCardIds([+cardId], false)
       })
     }
 
@@ -202,9 +182,9 @@ class Deck extends React.Component {
     handleSelectCard(event) {
       const cardId = event.target.dataset.cardId;
       if (this.props.selectedCardIds.includes(+cardId)){
-        this.props.onsetSelectedCardIds([+cardId], false);
+        this.props.onSetSelectedCardIds([+cardId], false);
       } else {
-        this.props.onsetSelectedCardIds([+cardId], true);
+        this.props.onSetSelectedCardIds([+cardId], true);
       }
   }
 
@@ -328,9 +308,9 @@ class Deck extends React.Component {
     handleToggleSelectedForAll(event) {
       const allCardIds = this.props.deck.cards.map(card => card.id);
       if (event.target.dataset.selectedValue == 'true'){
-        this.props.onsetSelectedCardIds(allCardIds, true)
+        this.props.onSetSelectedCardIds(allCardIds, true)
       } else {
-        this.props.onsetSelectedCardIds(allCardIds, false)
+        this.props.onSetSelectedCardIds(allCardIds, false)
       }
     }
 
@@ -514,8 +494,7 @@ const mapDispatchToProps = dispatch => ({
   onSetGenerateImages: () => dispatch(setGenerateImages()),
   onUnsetGenerateImages: () => dispatch(unsetGenerateImages()),
   onSetShouldGeneratedImagesWasSet: () => dispatch(setShouldGenerateImagesWasSet()),
-  onsetSelectedCardIds: (cardIds, value) => dispatch(setSelectedCardIds(cardIds, value)),
-  setDeckSyncedWithCostumes: (value) => dispatch(setDeckSyncedWithCostumes(value)),
+  onSetSelectedCardIds: (cardIds, value) => dispatch(setSelectedCardIds(cardIds, value)),
   setDeck: deck => dispatch(setDeck(deck)),
 });
 

@@ -11,6 +11,7 @@ import {
 } from "../../reducers/cambrian/decks.js";
 
 import { autoUpdateProject } from '../../reducers/project-state';
+import consumer from "../../cable.js"
 
 import {
     activateTab,
@@ -31,6 +32,26 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         constructor(props) {
             super(props);
         }
+
+        componentDidMount() {
+            consumer.subscriptions.create({
+                channel: 'DecksChannel',
+                username: 'kmitov@axlessoft.com',
+            }, {
+                connected: () => console.log('connected'),
+                disconnected: () => console.log('disconnected'),
+                received: data => {
+                  console.log("Deck::receive event for deck. Setting deck synced to false")
+                  // FIXME. This should not refresh the whole deck. Only part of it
+                  // For the moment we are refreshing the whole deck
+                  this.props.setDeckSyncedWithCostumes(false);
+                }
+            })
+        }
+
+        componentWillUnmount() {
+            consumer.disconnect()
+        };
 
         componentDidUpdate (prevProps, prevState) {
             // What is this logic doing?
@@ -250,6 +271,7 @@ const DeckToCostumesHOC = function (WrappedComponent) {
         onSyncDeckWithCostumes: () => dispatch(setDeckSyncedWithCostumes(true)),
         onUnsyncDeckWithCostumes: () => dispatch(setDeckSyncedWithCostumes(false)),
         onActivateTab: tab => dispatch(activateTab(tab)),
+        setDeckSyncedWithCostumes: (value) => dispatch(setDeckSyncedWithCostumes(value)),
         setDeck: deck => dispatch(setDeck(deck)),
     });
 
