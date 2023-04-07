@@ -75,7 +75,7 @@ ReactDOM.render(<WrappedPlayer
                   // projectHost={"http://localhost:3030/scratch/games"}
                   // decksHost={"http://localhost:3030/scratch"}
                   // assetHost={"http://localhost:3030/scratch/assets"}
-                  projectHost={"https://app.cambrian.gg/scratch/games"}
-                  decksHost={"https://app.cambrian.gg/scratch"}
-                  assetHost={"https://app.cambrian.gg/scratch/assets"}
+                  projectHost={"https://cambrian.gg/scratch/games"}
+                  decksHost={"https://cambrian.gg/scratch"}
+                  assetHost={"https://cambrian.gg/scratch/assets"}
                 />, appTarget);
