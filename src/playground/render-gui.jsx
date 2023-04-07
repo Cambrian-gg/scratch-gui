@@ -10,7 +10,7 @@ import HashParserHOC from '../lib/hash-parser-hoc.jsx';
 import log from '../lib/log.js';
 
 const onClickLogo = () => {
-    window.location = 'https://cambrian.gg';
+    window.location = 'https://www.cambrian.gg';
 };
 
 const handleTelemetryModalCancel = () => {
@@ -96,11 +96,11 @@ export default appTarget => {
                 // projectHost={projectHost || "http://localhost:3030/scratch/games"}
                 // decksHost={deckHost || "http://localhost:3030/scratch"}
                 // assetHost={assetHost || "http://localhost:3030/scratch/assets"}
-                projectHost={"https://cambrian.gg/scratch/games"}
-                decksHost={"https://cambrian.gg/scratch"}
-                assetHost={"https://cambrian.gg/scratch/assets"}
+                projectHost={"https://www.cambrian.gg/scratch/games"}
+                decksHost={"https://www.cambrian.gg/scratch"}
+                assetHost={"https://www.cambrian.gg/scratch/assets"}
                 onClickLogo={onClickLogo}
-                logo="https://cambrian.gg/assets/text-logo-dadaf9faac43fab06d46fadac4736e61b148d203fc656759f3dbf30a6aaabaaf.png"
+                logo="https://www.cambrian.gg/assets/text-logo-dadaf9faac43fab06d46fadac4736e61b148d203fc656759f3dbf30a6aaabaaf.png"
             />,
         appTarget);
 };

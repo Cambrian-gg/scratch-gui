@@ -27,9 +27,9 @@ The token is issued as an API token from the platform. When starting the Platfor
        projectHost={projectHost || "http://localhost:3030/scratch/projects"}
        decksHost={deckHost || "http://localhost:3030/scratch"}
        assetHost={assetHost || "http://localhost:3030/scratch/assets"}
-       // projectHost={"https://cambrian.gg/scratch/projects"}
-       // decksHost={"https://cambrian.gg/scratch"}
-       // assetHost={"https://cambrian.gg/scratch/assets"}
+       // projectHost={"https://www.cambrian.gg/scratch/projects"}
+       // decksHost={"https://www.cambrian.gg/scratch"}
+       // assetHost={"https://www.cambrian.gg/scratch/assets"}
        onClickLogo={onClickLogo}
 ```
 
@@ -50,15 +50,15 @@ The token is issued as an API token from the platform. When starting the Platfor
 -                // projectHost={projectHost || "http://localhost:3030/scratch/games"}
 -                // decksHost={deckHost || "http://localhost:3030/scratch"}
 -                // assetHost={assetHost || "http://localhost:3030/scratch/assets"}
--                projectHost={"https://cambrian.gg/scratch/games"}
--                decksHost={"https://cambrian.gg/scratch"}
--                assetHost={"https://cambrian.gg/scratch/assets"}
+-                projectHost={"https://www.cambrian.gg/scratch/games"}
+-                decksHost={"https://www.cambrian.gg/scratch"}
+-                assetHost={"https://www.cambrian.gg/scratch/assets"}
 +                projectHost={projectHost || "http://localhost:3030/scratch/games"}
 +                decksHost={deckHost || "http://localhost:3030/scratch"}
 +                assetHost={assetHost || "http://localhost:3030/scratch/assets"}
-+                // projectHost={"https://cambrian.gg/scratch/games"}
-+                // decksHost={"https://cambrian.gg/scratch"}
-+                // assetHost={"https://cambrian.gg/scratch/assets"}
++                // projectHost={"https://www.cambrian.gg/scratch/games"}
++                // decksHost={"https://www.cambrian.gg/scratch"}
++                // assetHost={"https://www.cambrian.gg/scratch/assets"}
 ```
 
 2. Edit src/playground/player.jsx to be
@@ -72,15 +72,15 @@ The token is issued as an API token from the platform. When starting the Platfor
 -                  // projectHost={"http://localhost:3030/scratch/games"}
 -                  // decksHost={"http://localhost:3030/scratch"}
 -                  // assetHost={"http://localhost:3030/scratch/assets"}
--                  projectHost={"https://cambrian.gg/scratch/games"}
--                  decksHost={"https://cambrian.gg/scratch"}
--                  assetHost={"https://cambrian.gg/scratch/assets"}
+-                  projectHost={"https://www.cambrian.gg/scratch/games"}
+-                  decksHost={"https://www.cambrian.gg/scratch"}
+-                  assetHost={"https://www.cambrian.gg/scratch/assets"}
 +                  projectHost={"http://localhost:3030/scratch/games"}
 +                  decksHost={"http://localhost:3030/scratch"}
 +                  assetHost={"http://localhost:3030/scratch/assets"}
-+                  // projectHost={"https://cambrian.gg/scratch/games"}
-+                  // decksHost={"https://cambrian.gg/scratch"}
-+                  // assetHost={"https://cambrian.gg/scratch/assets"}
++                  // projectHost={"https://www.cambrian.gg/scratch/games"}
++                  // decksHost={"https://www.cambrian.gg/scratch"}
++                  // assetHost={"https://www.cambrian.gg/scratch/assets"}
 ```
 
 3. Edit src/cable.js to be
@@ -93,9 +93,9 @@ The token is issued as an API token from the platform. When starting the Platfor
  const cableHost = searchParams.get('cable_host');
 
 -// const URL = cableHost || 'ws://localhost:3030/cable';
--const URL = 'wss://cambrian.gg/cable'
+-const URL = 'wss://www.cambrian.gg/cable'
 +const URL = cableHost || 'ws://localhost:3030/cable';
-+// const URL = 'wss://cambrian.gg/cable'
++// const URL = 'wss://www.cambrian.gg/cable'
 ```
 
 

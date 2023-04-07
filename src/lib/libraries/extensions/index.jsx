@@ -63,7 +63,7 @@ export default [
         internetConnectionRequired: true,
         connectionIconURL: ev3ConnectionIconURL,
         connectionSmallIconURL: ev3ConnectionSmallIconURL,
-        helpLink: 'https://cambrian.gg/extensions/'
+        helpLink: 'https://www.cambrian.gg/extensions/'
     },
     {
         name: (

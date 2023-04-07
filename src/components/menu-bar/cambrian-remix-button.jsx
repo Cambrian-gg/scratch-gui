@@ -33,7 +33,7 @@ class CambrianRemix extends React.Component {
                 // FIXME: This value should come from the redux state
                 // Waiting for a good opportunity to abstract it. I probably will
                 // wait to need it at one more place. For now it is ok
-                const projectHost = "https://cambrian.gg"
+                const projectHost = "https://www.cambrian.gg"
                 window.location.href=`${projectHost}/games/${projectId}`
               }}
           >
