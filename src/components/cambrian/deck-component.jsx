@@ -6,6 +6,11 @@ import CardNameInputComponent from '../../components/cambrian/card-name-input-co
 
 function DeckComponent(props) {
 
+    const truncateString = (string = '', maxLength = 50) =>
+      string && string.length > maxLength
+      ? `${string.substring(0, maxLength)}...`
+      : string
+
     const {
       deck,
       onCreateCard,
@@ -76,7 +81,7 @@ function DeckComponent(props) {
                   // The platform has prepared it for us
                   // I HATE JSX. This way of doing things looks and feels awful.
                   card.cardAiGenerations.find(cag => cag["humanReadableError"] && cag["humanReadableError"]["code"] != "200") != null
-                    && <span>{ card.cardAiGenerations.find(cag => cag["humanReadableError"] && cag["humanReadableError"]["code"] != "200")["humanReadableError"]["message"] }</span>
+                    && <span>{ truncateString(card.cardAiGenerations.find(cag => cag["humanReadableError"] && cag["humanReadableError"]["code"] != "200")["humanReadableError"]["message"]) }</span>
                 }
               </div>
             </div>
