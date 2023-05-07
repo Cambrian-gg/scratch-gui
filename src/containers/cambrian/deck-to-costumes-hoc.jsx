@@ -119,11 +119,33 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             // to avoid indexOf issues that occur when reordering the cards
             // in the createCardInCostumes
             return this.loadDeckFromServer().then(()=> {
-                return this.emptyAllCardCostumes()
-            }).then(()=> {
-                return this.recreateCostumesFromCards();
-            }).then(()=> {
-                return this.reorderCostumesBasedOnCards();
+            //     return this.emptyAllCardCostumes()
+            // }).then(()=> {
+            //     return this.recreateCostumesFromCards();
+            // }).then(()=> {
+            //     return this.reorderCostumesBasedOnCards();
+                // drawableID == 1 means that only the first sprite created
+                // will have the cards. I am not sure about the drawableID
+                // API. Probably should be by the name of the target,
+                // but there are already existing games that will have to be migrated
+                // because they use the name 'Sprite1' and renaming it to 'cards' will
+                // be a huge migrations.
+                const ID_OF_FIRST_CREATED_SPRITE = 1
+                if(vm.editingTarget.drawableID == ID_OF_FIRST_CREATED_SPRITE) {
+                    const scope = this;
+
+                    const syncCostumesPromise = new Promise((resolve, reject) => {
+                      scope.emptyAllCardCostumes();
+                      scope.recreateCostumesFromCards().then(()=> {
+                        scope.reorderCostumesBasedOnCards();
+                        resolve();
+                      })
+                    })
+                    return syncCostumesPromise;
+                } else {
+                  // nothing to do here. We are in another sprite
+                  return Promise.resolve()
+                }
             }).then(()=> {
               this.props.onSyncDeckWithCostumes();
               this.props.onAutoUpdateProject();
@@ -197,12 +219,13 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             // console.log("DeckToCostumesHOC::recreateCostumesFromCards")
             const deck = this.props.deck;
             const scope = this;
+            let allCreatePromises = []
             if(deck) {
-                const allCreatePromises = deck.cards.map((card)=> {
+                allCreatePromises = deck.cards.map((card)=> {
                   return createCardInCostumes(card, this)
                 })
-                return Promise.all(allCreatePromises)
             }
+            return Promise.all(allCreatePromises)
         }
 
         reorderCostumesBasedOnCards() {
