@@ -5,7 +5,7 @@ import {costumeUpload} from '../../lib/file-uploader.js';
  *
  * @return a promise that will resovle when the card is create. Resolve with the costume as param
  */
-function createCardInCostumes(card, scope) {
+function createCardInCostumes(card, costumesTarget, scope) {
     const url = `${card.imageUrl}?time=${Date.now()}`;
     const storage = scope.props.vm.runtime.storage;
     const vm = scope.props.vm;
@@ -30,11 +30,11 @@ function createCardInCostumes(card, scope) {
                   vmCostumes.forEach((costume, i) => {
                       costume.name = `card-${card.id}-${card.name}`;
                   });
-                  scope.addCostume(vmCostumes, false, null).then(() => {
+                  scope.addCostume(vmCostumes, costumesTarget.id, null).then(() => {
                       const costume = vmCostumes[0];
-                      const index = scope.props.vm.editingTarget.getCostumes().indexOf(costume)
+                      const index = costumesTarget.getCostumes().indexOf(costume)
                       const newIndex = scope.props.deck.cards.indexOf(card)
-                      vm.editingTarget.reorderCostume(index, newIndex)
+                      costumesTarget.reorderCostume(index, newIndex)
                       resolve(costume)
                   });
               },()=>{

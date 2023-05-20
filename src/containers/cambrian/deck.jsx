@@ -11,7 +11,8 @@ import {
     unsetGenerateImages,
     setShouldGenerateImagesWasSet,
     setSelectedCardIds,
-    setDeck
+    setDeck,
+    setDeckSyncedWithCostumes,
 } from '../../reducers/cambrian/decks';
 
 import { createCardInCostumes } from "../../lib/cambrian/costumes-utilities.js";
@@ -29,7 +30,8 @@ class Deck extends React.Component {
               'handleUpdateCardCategoryValue',
               'handleCreateDeck',
               'handleUpdateDeck',
-              'handleChangeDeck',
+              'handleChangeDeckName',
+              'handleChangeCostumesSpriteName',
               'handleCreateCardAiGeneration',
               'handleCreateCardAiGenerationForSelected',
               'handleDeleteForSelected',
@@ -122,7 +124,7 @@ class Deck extends React.Component {
       deleteFromServerPromise.then(() => {
         this.deleteCardFromDeckComponent(cardId)
       }).then(() => {
-        this.deleteCardFromCostumes(cardId);
+        this.setDeckSyncedWithCostumes(false)
       }).then(() => {
         this.props.onSetSelectedCardIds([+cardId], false)
       })
@@ -152,18 +154,6 @@ class Deck extends React.Component {
         });
     }
 
-    deleteCardFromCostumes(cardId) {
-        const {
-            vm
-        } = this.props;
-
-        const costumes = vm.editingTarget.sprite.costumes_.filter(costume=> costume.name.startsWith(`card-${cardId}-`))
-        costumes.forEach(costume => {
-          const index = vm.editingTarget.sprite.costumes_.indexOf(costume)
-          vm.editingTarget.deleteCostume(index);
-        })
-    }
-
     deleteCardFromDeckComponent(cardId) {
         const newCards = this.props.deck.cards.filter(card=> {
           return card.id != cardId
@@ -180,13 +170,13 @@ class Deck extends React.Component {
     }
 
     handleSelectCard(event) {
-      const cardId = event.target.dataset.cardId;
-      if (this.props.selectedCardIds.includes(+cardId)){
-        this.props.onSetSelectedCardIds([+cardId], false);
-      } else {
-        this.props.onSetSelectedCardIds([+cardId], true);
-      }
-  }
+        const cardId = event.target.dataset.cardId;
+        if (this.props.selectedCardIds.includes(+cardId)){
+          this.props.onSetSelectedCardIds([+cardId], false);
+        } else {
+          this.props.onSetSelectedCardIds([+cardId], true);
+        }
+    }
 
     handleUpdateCardName(event) {
         const deck = this.props.deck
@@ -199,27 +189,9 @@ class Deck extends React.Component {
         this.props.setDeck(deck);
 
         // don't update a specific card. Update the whole deck on the server
-        this.updateDeckOnServer().then(()=> {
-          // This update happens only if we change categories or names
-          // The image could change only from the server
-          this.updateCostumeNameFromCard(card)
-        }).catch(error => {
+        this.updateDeckOnServer().catch(error => {
           console.log("Error: ", error)
         })
-    }
-
-    updateCostumeNameFromCard(card) {
-        // I should find a way to do this only if the name has changed.
-        // Not to do it on every change.
-        // This comes later when we have a "change API"
-        const {
-          vm
-        } = this.props;
-
-        const costume = vm.editingTarget.getCostumes().filter(c=> c.name.startsWith(`card-${card.id}-`))[0]
-        if(costume) {
-          costume.name = `card-${card.id}-${card.name}`
-        }
     }
 
     handleUpdateCategory(event) {
@@ -354,12 +326,20 @@ class Deck extends React.Component {
         Promise.all([promise])
     }
 
-    handleChangeDeck(event) {
+    handleChangeDeckName(event) {
       const deckName = event.target.value;
       this.props.setDeck({
           ...this.props.deck,
           name: deckName
       })
+    }
+
+    handleChangeCostumesSpriteName(event) {
+        const costumesSpriteName = event.target.value;
+        this.props.setDeck({
+          ...this.props.deck,
+          costumesSpriteName: costumesSpriteName
+        })
     }
 
     handleUpdateDeck() {
@@ -404,6 +384,7 @@ class Deck extends React.Component {
                     "cardsAttributes": cardAttributes ,
                     "categoriesAttributes": deck.categories,
                     "name": deck.name,
+                    "costumesSpriteName": deck.costumesSpriteName
                   }
                 })
             }, (error, response) => {
@@ -416,6 +397,7 @@ class Deck extends React.Component {
                 // creating from updating category_values without providing category_value.id, but it will not follow the accept_nested_attribute rules.
                 this.props.setDeck(JSON.parse(response.body))
                 this.setState({...this.state, isLoading: false})
+                this.props.setDeckSyncedWithCostumes(false)
                 return resolve(response.body, decksHost);
             });
         });
@@ -453,7 +435,8 @@ class Deck extends React.Component {
                 onUpdateCardCategoryValue={this.handleUpdateCardCategoryValue}
                 onCreateDeck={this.handleCreateDeck}
                 onUpdateDeck={this.handleUpdateDeck}
-                onChangeDeck={this.handleChangeDeck}
+                onChangeDeckName={this.handleChangeDeckName}
+                onChangeCostumesSpriteName={this.handleChangeCostumesSpriteName}
                 onCreateCardAiGeneration={this.handleCreateCardAiGeneration}
                 isGenerateImagesSelected={this.props.shouldGenerateImages}
                 onGenerateImagesChanged={this.handleGenerateImagesChanged}
@@ -477,7 +460,7 @@ Deck.propTypes = {
   selectedCardIds: PropTypes.arrayOf(PropTypes.number),
   vm: PropTypes.instanceOf(VM),
   deckSyncedWithCostumes: PropTypes.bool,
-  deck: PropTypes.any
+  deck: PropTypes.any,
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -496,6 +479,7 @@ const mapDispatchToProps = dispatch => ({
   onSetShouldGeneratedImagesWasSet: () => dispatch(setShouldGenerateImagesWasSet()),
   onSetSelectedCardIds: (cardIds, value) => dispatch(setSelectedCardIds(cardIds, value)),
   setDeck: deck => dispatch(setDeck(deck)),
+  setDeckSyncedWithCostumes: (value) => dispatch(setDeckSyncedWithCostumes(value)),
 });
 
 export default errorBoundaryHOC('Deck')(

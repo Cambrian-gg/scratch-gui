@@ -118,26 +118,20 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             // We first delete all the costumes and then crete the new ones
             // to avoid indexOf issues that occur when reordering the cards
             // in the createCardInCostumes
-            return this.loadDeckFromServer().then(()=> {
+            return this.loadDeckFromServer().then((deck) => {
             //     return this.emptyAllCardCostumes()
             // }).then(()=> {
             //     return this.recreateCostumesFromCards();
             // }).then(()=> {
             //     return this.reorderCostumesBasedOnCards();
-                // drawableID == 1 means that only the first sprite created
-                // will have the cards. I am not sure about the drawableID
-                // API. Probably should be by the name of the target,
-                // but there are already existing games that will have to be migrated
-                // because they use the name 'Sprite1' and renaming it to 'cards' will
-                // be a huge migrations.
-                const ID_OF_FIRST_CREATED_SPRITE = 1
-                if(vm.editingTarget.drawableID == ID_OF_FIRST_CREATED_SPRITE) {
+                const costumesTarget = this.findCostumesTarget(vm, deck)
+                if(costumesTarget) {
                     const scope = this;
 
                     const syncCostumesPromise = new Promise((resolve, reject) => {
-                      scope.emptyAllCardCostumes();
-                      scope.recreateCostumesFromCards().then(()=> {
-                        scope.reorderCostumesBasedOnCards();
+                      scope.emptyAllCardCostumes(costumesTarget);
+                      scope.recreateCostumesFromCards(costumesTarget).then(()=> {
+                        scope.reorderCostumesBasedOnCards(costumesTarget);
                         resolve();
                       })
                     })
@@ -156,7 +150,8 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             const {
               decksHost,
               projectToken,
-              projectId
+              projectId,
+              vm
             } = this.props;
             const promise = new Promise((resolve, reject) => {
               xhr({
@@ -179,16 +174,23 @@ const DeckToCostumesHOC = function (WrappedComponent) {
                               cards: [],
                               ...lastDeck
                             }
+                    // There are games for which we must init the costumesSpriteName with a default value
+                    // as we are introducing the property after there are so many games
+                    // This could be initialized by hand with all the games or we can
+                    // find some logic to do it. We can just open the old games and initialize it.
+                    if(deck.costumesSpriteName == null && vm.runtime.targets.filter(t => t.sprite.name == "Sprite1")[0]) {
+                      deck.costumesSpriteName = "Sprite1"
+                    }
                     this.props.setDeck(deck)
                     // take the first one as we know only how to handle the first one.
                     resolve(deck)
                   }
               })
             })
-            return Promise.all([promise])
+            return promise
         }
 
-        emptyAllCardCostumes() {
+        emptyAllCardCostumes(costumesTarget) {
             // console.log("DeckToCostumesHOC::emptyAllCardCostumes")
             const deck = this.props.deck;
             const scope = this;
@@ -205,30 +207,33 @@ const DeckToCostumesHOC = function (WrappedComponent) {
                   vm
                 } = this.props;
 
-                const costumes = vm.editingTarget.getCostumes().filter(costume => costume.name.startsWith(`card-`))
+                const costumes = costumesTarget.getCostumes().filter(costume => costume.name.startsWith(`card-`))
                 costumes.forEach(costume => {
-                  const index = vm.editingTarget.getCostumes().indexOf(costume)
-                  vm.editingTarget.deleteCostume(index);
+                  const index = costumesTarget.getCostumes().indexOf(costume)
+                  costumesTarget.deleteCostume(index);
                 })
-
                 return deck;
             }
         }
 
-        recreateCostumesFromCards() {
+        findCostumesTarget(vm, deck) {
+            return vm.runtime.targets.filter( t => t.sprite.name == deck.costumesSpriteName)[0]
+        }
+
+        recreateCostumesFromCards(costumesTarget) {
             // console.log("DeckToCostumesHOC::recreateCostumesFromCards")
             const deck = this.props.deck;
             const scope = this;
             let allCreatePromises = []
             if(deck) {
                 allCreatePromises = deck.cards.map((card)=> {
-                  return createCardInCostumes(card, this)
+                  return createCardInCostumes(card, costumesTarget, this)
                 })
             }
             return Promise.all(allCreatePromises)
         }
 
-        reorderCostumesBasedOnCards() {
+        reorderCostumesBasedOnCards(costumesTarget) {
             // console.log("DeckToCostumesHOC::reorderCostumesBasedOnCards")
             const {
               vm
@@ -238,23 +243,27 @@ const DeckToCostumesHOC = function (WrappedComponent) {
             if(deck) {
                 for(let i = 0; i < deck.cards.length; i++) {
                   const card = deck.cards[i]
-                  const currentCostumeIndex = vm.editingTarget.getCostumes().findIndex(c=> c.name.startsWith(`card-${card.id}-`))
+                  const currentCostumeIndex = costumesTarget.getCostumes().findIndex(c=> c.name.startsWith(`card-${card.id}-`))
                   const newCostumeIndex = i;
-                  vm.editingTarget.reorderCostume(currentCostumeIndex, i)
+                  costumesTarget.reorderCostume(currentCostumeIndex, i)
                 }
             }
         }
 
         deleteCardFromCostumes(cardId) {
             const {
-                vm
+                vm,
+                deck
             } = this.props;
 
-            const costumes = vm.editingTarget.sprite.costumes_.filter(costume=> costume.name.startsWith(`card-${cardId}-`))
-            costumes.forEach(costume => {
-              const index = vm.editingTarget.sprite.costumes_.indexOf(costume)
-              vm.editingTarget.deleteCostume(index);
-            })
+            const costumesTarget = this.findCostumesTarget(vm, deck)
+            if(costumesTarget) {
+              const costumes = costumesTarget.sprite.costumes_.filter(costume=> costume.name.startsWith(`card-${cardId}-`))
+              costumes.forEach(costume => {
+                const index = costumesTarget.sprite.costumes_.indexOf(costume)
+                costumesTarget.deleteCostume(index);
+              })
+            }
         }
 
         addCostume (costume, targetId) {

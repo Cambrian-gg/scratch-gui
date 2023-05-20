@@ -21,7 +21,8 @@ function DeckComponent(props) {
       onUpdateCardCategoryValue,
       onCreateDeck,
       onUpdateDeck,
-      onChangeDeck,
+      onChangeDeckName,
+      onChangeCostumesSpriteName,
       onCreateCardAiGeneration,
       onGenerateImagesChanged,
       isGenerateImagesSelected,
@@ -30,6 +31,11 @@ function DeckComponent(props) {
       onToggleSelectedForAll,
       selectedCardIds,
     } = props;
+
+    const onToggleLockCostumesSpriteName = (event) => {
+      const input = document.getElementById("costumesSpriteName")
+      input.disabled = !input.disabled
+    }
 
     if(deck) {
       const isLoading = props.isLoading || deck.cards.some( card => card.cardAiGenerations.some(cag=> cag["completedAt"] == null));
@@ -126,12 +132,32 @@ function DeckComponent(props) {
               <input
                 className="pl-2 block rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
                 id="deckName"
-                onChange={onChangeDeck}
+                onChange={onChangeDeckName}
                 onBlur={onUpdateDeck}
                 value={deck.name}
               />
             </div>
           </div>
+          <div>
+            <label htmlFor="deckName" className="block text-sm font-medium text-gray-700">
+              Costumes Sprite
+            </label>
+            <div className="mt-1">
+              <div class="flex">
+                <input
+                  className="pl-2 block rounded border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 h-8"
+                  id="costumesSpriteName"
+                  disabled
+                  onChange={onChangeCostumesSpriteName}
+                  onBlur={onUpdateDeck}
+                  value={deck.costumesSpriteName}
+                />
+                <button onClick={onToggleLockCostumesSpriteName} id="costumesSpriteNameUnlock" className="ml-2 relative inline-flex items-center rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">Toggle Lock</button>
+              </div>
+              <span>The cards will be added as images to the sprite with this name. Then in the code of the game you can use the default scratch blocks to change the costumes of the sprite. By default this option is locked.</span>
+            </div>
+          </div>
+
           <div>
             <h2 className="h3">Card List ({deck.cards.length})</h2>
 
@@ -201,7 +227,8 @@ DeckComponent.propTypes = {
     onUpdateCardCategoryValue: PropTypes.func,
     onCreateDeck: PropTypes.func,
     onUpdateDeck: PropTypes.func,
-    onChangeDeck: PropTypes.func,
+    onChangeDeckName: PropTypes.func,
+    onChangeCostumesSpriteName: PropTypes.func,
     onCreateCardAiGeneration: PropTypes.func,
     isGenerateImagesSelected: PropTypes.bool,
     onGenerateImagesChanged: PropTypes.func,
